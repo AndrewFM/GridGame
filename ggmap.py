@@ -4,6 +4,7 @@ import pygame
 class MapGrid():
 
 	#TODO: We need a data structure for holding all the parties that are on the map grid.
+	#	   This includes a way to tell which party is controlled by the player, which is controlled by the AI, etc.
 	#		We also need a data structure to track the movement sequence the player is currently inputting.
 	#		We need a way to track the health of each of the players.
 	#		We need a way to distinguish between the simulation phase and the input phase.
@@ -31,6 +32,9 @@ class MapGrid():
 		#TODO: Move the party located at (sourcex, sourcey) to (destx, desty)
 		#Alternately, you can implement functions for moving up/left/down/right by one grid cell
 		todo = 0
+
+	def removeParty(self, gridx, gridy):
+		#TODO: Remove the party located at (gridx, gridy) from the map.
 
 	def rotateParty(self, gridx, gridy):
 		#TODO: Rotate the party located at (gridx, gridy) by 90 degrees
