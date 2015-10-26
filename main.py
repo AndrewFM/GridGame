@@ -50,7 +50,7 @@ while running:
 	if event.type == pygame.QUIT:
 		running = 0
 	else:
-		screen.fill((0,0,0))
+		screen.fill((227,237,216))
 
 		# [SCENE] Create Party
 		if current_scene == CREATE_PARTY:
