@@ -38,9 +38,9 @@ def switchToScene(sc):
 		partyCanvas.gridPosition(25,25)
 		selectedChar = ggparty.SINGLE_SHOT
 	elif sc == GAME_GRID:
-		mapCanvas = MapGrid(12,12)
+		mapCanvas = ggmap.MapGrid(12,12)
 
-switchToScene(CREATE_PARTY)
+switchToScene(GAME_GRID)
 
 # Game Loop
 while running:
@@ -84,6 +84,7 @@ while running:
 
 		# [SCENE] Actual Game
 		elif current_scene == GAME_GRID:
+			mapCanvas.update(event)
 			mapCanvas.renderGrid(screen)
 
 		pygame.display.flip()
