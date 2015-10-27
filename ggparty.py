@@ -53,7 +53,18 @@ class PartyGrid():
 		self.grid_angle = RIGHT	   # Facing direction of the entire party grid as a whole
 		self.party_members = []    # Contains CharacterSprite elements. Must be in parallel with array below.
 		self.party_positions = []  # Contains (gridx, gridy) elements. Must be in parallel with array above.
-		self.grid_contents = [[(0,0,-1) for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] # Contains Character enum elements & grid pos of source character.		
+		self.grid_contents = [[(0,0,-1) for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] # Contains Character enum elements & grid pos of source character.
+		# Hardcoding the global rotation translations for the 1x2 character for now
+		# ... because I'm not totally sure how to do it programatically
+		self.double_posmapUD = [ #Up/Down to Left/Right
+			[(1,0),(1,1),(1,2)],
+			[(0,0),(0,1),(0,2)]
+		]
+		self.double_posmapLR = [ #Left/Right to Up/Down
+			[(2,0),(2,1),(-1,-1)],
+			[(1,0),(1,1),(-1,-1)],
+			[(0,0),(0,1),(-1,-1)]
+		]	
 
 	# Returns 1 if the character was successfully inserted, 0 otherwise.
 	# Angles should be in degrees, should be between 0 and 2pi, and should always be multiples of pi/2.
@@ -83,7 +94,7 @@ class PartyGrid():
 		if (chartype == SHIELD):
 			return [(gridx,gridy),(gridx+1,gridy),(gridx,gridy+1),(gridx+1,gridy+1)]
 		if (chartype == DOUBLE_SHOT):
-			if angle == 0 or angle == 180 or angle == 360:
+			if angle == LEFT or angle == RIGHT:
 				return[(gridx,gridy),(gridx+1,gridy)]
 			else:
 				return[(gridx,gridy),(gridx,gridy+1)]
@@ -174,18 +185,27 @@ class PartyGrid():
 		self.grid_angle = (self.grid_angle-90) % 360
 		for i in range(len(self.party_members)):
 			self.party_members[i].rotateRelative(-90)
-			if self.party_members[i].chartype == SHIELD:
-				gridbound = GRID_SIZE-1
+			if self.party_members[i].chartype != DOUBLE_SHOT:
+				if self.party_members[i].chartype == SHIELD:
+					gridbound = GRID_SIZE-1
+				else:
+					gridbound = GRID_SIZE
+				tempGrid = [[0 for _ in range(gridbound)] for _ in range(gridbound)]
+				tempGrid[self.party_positions[i][0]][self.party_positions[i][1]] = 1
+				ccwGrid = list(zip(*tempGrid))[::-1]
+				for col in range(gridbound):
+					for row in range(gridbound):
+						if ccwGrid[col][row] == 1:
+							updatedPosList.append((col,row))
+							break
 			else:
-				gridbound = GRID_SIZE
-			tempGrid = [[0 for _ in range(gridbound)] for _ in range(gridbound)]
-			tempGrid[self.party_positions[i][0]][self.party_positions[i][1]] = 1
-			ccwGrid = list(zip(*tempGrid))[::-1]
-			for col in range(gridbound):
-				for row in range(gridbound):
-					if ccwGrid[col][row] == 1:
-						updatedPosList.append((col,row))
-						break
+				#1x2 Character requires special rotation handling.
+				if self.party_members[i].rotation == LEFT or self.party_members[i].rotation == RIGHT:
+					updatedPosList.append((self.double_posmapUD[self.party_positions[i][1]][self.party_positions[i][0]][0]
+										 ,self.double_posmapUD[self.party_positions[i][1]][self.party_positions[i][0]][1]))
+				else:
+					updatedPosList.append((self.double_posmapLR[self.party_positions[i][1]][self.party_positions[i][0]][0]
+					 					 ,self.double_posmapLR[self.party_positions[i][1]][self.party_positions[i][0]][1]))
 
 		self.party_positions = updatedPosList
 		self.__updateGrid()

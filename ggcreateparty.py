@@ -49,13 +49,13 @@ class CreateParty():
 						self.selectedChar = i
 						break
 
-
 			elif event.button == MOUSE_RIGHT and gridCoords != (-1,-1):
 				# Right clicking on a character in the grid will rotate them
 				success = self.partyCanvas.rotateCharacterAt(gridCoords[0], gridCoords[1])
 				if success == 0:
-					self.previewAngle = (self.previewAngle + 90) % 360
-					self.partyCanvas.previewCharacter(self.selectedChar, self.previewAngle, gridCoords[0], gridCoords[1])
+					if self.partyCanvas.getCharacter(gridCoords[0], gridCoords[1]) == -1:
+						self.previewAngle = (self.previewAngle + 90) % 360
+						self.partyCanvas.previewCharacter(self.selectedChar, self.previewAngle, gridCoords[0], gridCoords[1])
 
 			elif event.button == MOUSE_RIGHT:
 				# Right clicking outside the party box simulates rotating the entire party (for debug purposes only, or maybe keep this?)
