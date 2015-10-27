@@ -2,6 +2,11 @@
 import pygame
 import ggparty
 
+# Enums/Constants
+#  -- Mouse Buttons
+MOUSE_LEFT = 1
+MOUSE_RIGHT = 3
+
 class MapGrid():
 
 	#TODO: We need a data structure for holding all the parties that are on the map grid.

@@ -1,17 +1,13 @@
 # The main file which should be run in order to launch the game.
 from pygame.locals import *
 import pygame
-import math
-import ggparty
+import ggcreateparty
 import ggmap
 
-# Enum constants
+# Enums/Constants
 #  -- Scenes
 CREATE_PARTY = 1
 GAME_GRID = 2
-#  -- Mouse Buttons
-MOUSE_LEFT = 1
-MOUSE_RIGHT = 3
 
 # Import resources
 img_char = [0 for x in range(3)]
@@ -25,22 +21,16 @@ clock = pygame.time.Clock()
 fps = 60
 running = 1
 current_scene = CREATE_PARTY
-partyCanvas = 0
-mapCanvas = 0
-
-# Create Party scene initilization
-selectedChar = 0
-previewAngle = ggparty.RIGHT
+partyScene = -1
+mapScene = -1
 
 def switchToScene(sc):
-	global current_scene, partyCanvas, selectedChar, mapCanvas
+	global current_scene, partyScene, mapScene
 	current_scene = sc
 	if sc == CREATE_PARTY:
-		partyCanvas = ggparty.PartyGrid()
-		partyCanvas.gridPosition(25,25)
-		selectedChar = ggparty.SINGLE_SHOT
+		partyScene = ggcreateparty.CreateParty()
 	elif sc == GAME_GRID:
-		mapCanvas = ggmap.MapGrid(12,12)
+		mapScene = ggmap.MapGrid(12,12)
 
 switchToScene(current_scene)
 
@@ -56,45 +46,12 @@ while running:
 
 		# [SCENE] Create Party
 		if current_scene == CREATE_PARTY:
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				# Get the grid cell that we clicked on
-				gridCoords = partyCanvas.screenToGridCoords(event.pos[0], event.pos[1])
-
-				if event.button == MOUSE_LEFT and gridCoords != (-1,-1):
-					if partyCanvas.getCharacter(gridCoords[0], gridCoords[1]) == -1:
-						# Left clicking on an empty spot in the grid will add the character, if we haven't reached the size limit
-						if partyCanvas.numberOfCharacters() < 2:
-							partyCanvas.appendCharacter(selectedChar, previewAngle, gridCoords[0], gridCoords[1])
-					else:
-						# Left clicking on a character in the grid will remove it
-						partyCanvas.removeCharacter(gridCoords[0], gridCoords[1])
-
-				elif event.button == MOUSE_RIGHT and gridCoords != (-1,-1):
-					# Right clicking on a character in the grid will rotate them
-					success = partyCanvas.rotateCharacterAt(gridCoords[0], gridCoords[1])
-					if success == 0:
-						previewAngle = (previewAngle + 90) % 360
-						partyCanvas.previewCharacter(selectedChar, previewAngle, gridCoords[0], gridCoords[1])
-
-				elif event.button == MOUSE_RIGHT:
-					# Right clicking outside the party box simulates rotating the entire party (for debug purposes only, or maybe keep this?)
-					partyCanvas.rotatePartyClockwise()
-
-
-			if event.type == pygame.MOUSEMOTION:
-				# Get the grid cell the mouse is hovering over, if any
-				gridCoords = partyCanvas.screenToGridCoords(event.pos[0], event.pos[1])
-
-				if gridCoords != (-1, -1):
-					# Draw a preview of the character as they would appear if we placed them where the mouse is hovering
-					if partyCanvas.numberOfCharacters() < 2:
-						partyCanvas.previewCharacter(selectedChar, previewAngle, gridCoords[0], gridCoords[1])
-
-			partyCanvas.renderGrid(screen)
+			partyScene.update(event)
+			partyScene.render(screen)			
 
 		# [SCENE] Actual Game
 		elif current_scene == GAME_GRID:
-			mapCanvas.update(event)
-			mapCanvas.renderGrid(screen)
+			mapScene.update(event)
+			mapScene.renderGrid(screen)
 
 		pygame.display.flip()
