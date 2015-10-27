@@ -1,5 +1,6 @@
 # Data structure for the playing grid that the game takes place on.
 import pygame
+import ggparty
 
 class MapGrid():
 
@@ -35,9 +36,10 @@ class MapGrid():
 
 	def removeParty(self, gridx, gridy):
 		#TODO: Remove the party located at (gridx, gridy) from the map.
+		todo = 0
 
-	def rotateParty(self, gridx, gridy):
-		#TODO: Rotate the party located at (gridx, gridy) by 90 degrees
+	def rotateParty(self, gridx, gridy, angle):
+		#TODO: Rotate the party located at (gridx, gridy). The angle should be ggparty.UP, ggparty.DOWN, ggparty.LEFT, or ggparty.RIGHT.
 		todo = 0
 
 	def simulateShoot(self):

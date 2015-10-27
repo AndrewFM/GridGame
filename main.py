@@ -10,8 +10,8 @@ import ggmap
 CREATE_PARTY = 1
 GAME_GRID = 2
 #  -- Mouse Buttons
-LEFT = 1
-RIGHT = 3
+MOUSE_LEFT = 1
+MOUSE_RIGHT = 3
 
 # Import resources
 img_char = [0 for x in range(3)]
@@ -27,8 +27,10 @@ running = 1
 current_scene = CREATE_PARTY
 partyCanvas = 0
 mapCanvas = 0
+
+# Create Party scene initilization
 selectedChar = 0
-#pygame.mouse.getPos
+previewAngle = ggparty.RIGHT
 
 def switchToScene(sc):
 	global current_scene, partyCanvas, selectedChar, mapCanvas
@@ -40,7 +42,7 @@ def switchToScene(sc):
 	elif sc == GAME_GRID:
 		mapCanvas = ggmap.MapGrid(12,12)
 
-switchToScene(GAME_GRID)
+switchToScene(current_scene)
 
 # Game Loop
 while running:
@@ -58,18 +60,22 @@ while running:
 				# Get the grid cell that we clicked on
 				gridCoords = partyCanvas.screenToGridCoords(event.pos[0], event.pos[1])
 
-				if event.button == LEFT and gridCoords != (-1,-1):
+				if event.button == MOUSE_LEFT and gridCoords != (-1,-1):
 					if partyCanvas.getCharacter(gridCoords[0], gridCoords[1]) == -1:
 						# Left clicking on an empty spot in the grid will add the character, if we haven't reached the size limit
 						if partyCanvas.numberOfCharacters() < 2:
-							partyCanvas.appendCharacter(selectedChar, 0, gridCoords[0], gridCoords[1])
+							partyCanvas.appendCharacter(selectedChar, previewAngle, gridCoords[0], gridCoords[1])
 					else:
 						# Left clicking on a character in the grid will remove it
 						partyCanvas.removeCharacter(gridCoords[0], gridCoords[1])
 
-				elif event.button == RIGHT and gridCoords != (-1,-1):
+				elif event.button == MOUSE_RIGHT and gridCoords != (-1,-1):
 					# Right clicking on a character in the grid will rotate them
-					partyCanvas.rotateCharacterAt(gridCoords[0], gridCoords[1])
+					success = partyCanvas.rotateCharacterAt(gridCoords[0], gridCoords[1])
+					if success == 0:
+						previewAngle = (previewAngle + 90) % 360
+						partyCanvas.previewCharacter(selectedChar, previewAngle, gridCoords[0], gridCoords[1])
+
 
 			if event.type == pygame.MOUSEMOTION:
 				# Get the grid cell the mouse is hovering over, if any
@@ -78,7 +84,7 @@ while running:
 				if gridCoords != (-1, -1):
 					# Draw a preview of the character as they would appear if we placed them where the mouse is hovering
 					if partyCanvas.numberOfCharacters() < 2:
-						partyCanvas.previewCharacter(selectedChar, 0, gridCoords[0], gridCoords[1])
+						partyCanvas.previewCharacter(selectedChar, previewAngle, gridCoords[0], gridCoords[1])
 
 			partyCanvas.renderGrid(screen)
 
