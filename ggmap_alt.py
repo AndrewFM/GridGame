@@ -12,11 +12,11 @@ RED = (255, 0, 0)
 # This sets the WIDTH and HEIGHT of each grid location
 BOARD_SIZE = 255;
 CONSOLE_SIZE = 100;
-WIDTH = BOARD_SIZE*4/51
-HEIGHT = BOARD_SIZE*4/51
+WIDTH = BOARD_SIZE*4/(5*GRID_SIZE+1)
+HEIGHT = BOARD_SIZE*4/(5*GRID_SIZE+1)
  
 # This sets the margin between each cell
-MARGIN = BOARD_SIZE/51
+MARGIN = BOARD_SIZE/(5*GRID_SIZE+1)
  
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
