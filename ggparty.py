@@ -146,7 +146,19 @@ class PartyGrid():
 		findPosition = (self.grid_contents[gridx][gridy][0], self.grid_contents[gridx][gridy][1])
 		for i in range(len(self.party_positions)):
 			if self.party_positions[i] == findPosition:
-				self.party_members[i].rotateRelative(90)
+				if self.party_members[i].chartype == DOUBLE_SHOT:
+					#The 1x2 character has some weird rotation handling
+					newAngle = (self.party_members[i].rotation + 90) % 360
+					remPos = self.party_positions[i]
+					remAngle = self.party_members[i].rotation
+					self.removeCharacter(gridx, gridy)
+					if self.__canPlaceHere(self.__determineOccupyingCells(DOUBLE_SHOT, newAngle, remPos[0], remPos[1])) == 0:
+						self.appendCharacter(DOUBLE_SHOT, remAngle, remPos[0], remPos[1])
+						return 0
+					else:
+						self.appendCharacter(DOUBLE_SHOT, newAngle, remPos[0], remPos[1])
+				else:
+					self.party_members[i].rotateRelative(90)
 				self.__updateGrid()
 				return 1
 		return 0
