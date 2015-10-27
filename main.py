@@ -76,6 +76,10 @@ while running:
 						previewAngle = (previewAngle + 90) % 360
 						partyCanvas.previewCharacter(selectedChar, previewAngle, gridCoords[0], gridCoords[1])
 
+				elif event.button == MOUSE_RIGHT:
+					# Right clicking outside the party box simulates rotating the entire party (for debug purposes only, or maybe keep this?)
+					partyCanvas.rotatePartyClockwise()
+
 
 			if event.type == pygame.MOUSEMOTION:
 				# Get the grid cell the mouse is hovering over, if any

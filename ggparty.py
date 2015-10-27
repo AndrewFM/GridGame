@@ -15,6 +15,7 @@ DOWN = 270
 GRID_SIZE = 3  # In number of cells
 CELL_SIZE = 32 # In pixels
 GRID_COLOR = (0,0,0)
+GRID_ARROW_SIZE = 16 # In pixels
 
 # Representation of a single character within a party.
 class CharacterSprite(pygame.sprite.Sprite):
@@ -151,19 +152,19 @@ class PartyGrid():
 		return 0
 
 	# Rotates the entire party clockwise by 90 degrees
-	def rotatePartyClockwise(self):
-		for _ in range(3):
-			self.rotatePartyCClockwise()
-
-	# Rotates the entire party counter-clockwise by 90 degrees
 	def rotatePartyCounterClockwise(self):
+		for _ in range(3):
+			self.rotatePartyClockwise()
+
+	# Rotates the entire party clockwise by 90 degrees
+	def rotatePartyClockwise(self):
 		updatedPosList = []
-		self.grid_angle = (self.grid_angle+90) % 360
+		self.grid_angle = (self.grid_angle-90) % 360
 		for i in range(len(self.party_members)):
-			self.party_members[i].rotateRelative(90)
+			self.party_members[i].rotateRelative(-90)
 			tempGrid = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
-			tempGrid[self.party_positions[i][0],self.party_positions[i][1]] = 1
-			ccwGrid = zip(*tempGrid)[::-1]
+			tempGrid[self.party_positions[i][0]][self.party_positions[i][1]] = 1
+			ccwGrid = list(zip(*tempGrid))[::-1]
 			for col in range(GRID_SIZE):
 				for row in range(GRID_SIZE):
 					if ccwGrid[col][row] == 1:
@@ -214,6 +215,23 @@ class PartyGrid():
 		for col in range(1,GRID_SIZE):
 			pygame.draw.line(screen, GRID_COLOR, (self.grid_position[0]+col*CELL_SIZE, self.grid_position[1])
 				                               , (self.grid_position[0]+col*CELL_SIZE, self.grid_position[1]+GRID_SIZE*CELL_SIZE), 1)
+
+		if self.grid_angle == RIGHT:
+			pygame.draw.polygon(screen, GRID_COLOR, ((self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1])
+				,(self.grid_position[0]+GRID_SIZE*CELL_SIZE+GRID_ARROW_SIZE,self.grid_position[1]+(GRID_SIZE*CELL_SIZE)/2)
+				,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
+		elif self.grid_angle == UP:
+			pygame.draw.polygon(screen, GRID_COLOR, ((self.grid_position[0],self.grid_position[1])
+				,(self.grid_position[0]+(GRID_SIZE*CELL_SIZE)/2,self.grid_position[1]-GRID_ARROW_SIZE)
+				,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1])), 0)
+		elif self.grid_angle == LEFT:
+			pygame.draw.polygon(screen, GRID_COLOR, ((self.grid_position[0],self.grid_position[1])
+				,(self.grid_position[0]-GRID_ARROW_SIZE,self.grid_position[1]+(GRID_SIZE*CELL_SIZE)/2)
+				,(self.grid_position[0],self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
+		elif self.grid_angle == DOWN:
+			pygame.draw.polygon(screen, GRID_COLOR, ((self.grid_position[0],self.grid_position[1]+GRID_SIZE*CELL_SIZE)
+				,(self.grid_position[0]+(GRID_SIZE*CELL_SIZE)/2,self.grid_position[1]+GRID_SIZE*CELL_SIZE+GRID_ARROW_SIZE)
+				,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
 
 		for member in self.party_members:
 			pygame.sprite.RenderPlain(member).draw(screen)

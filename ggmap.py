@@ -29,6 +29,11 @@ class MapGrid():
 		#TODO: add a party onto the map grid at the given position
 		todo = 0
 
+	def getParty(self, gridx, gridy):
+		#TODO: Return the party located at (gridx, gridy) on the map, or -1 if no party is located at that position.
+		todo = 0
+		return -1
+
 	def moveParty(self, sourcex, sourcey, destx, desty):
 		#TODO: Move the party located at (sourcex, sourcey) to (destx, desty)
 		#Alternately, you can implement functions for moving up/left/down/right by one grid cell
@@ -38,9 +43,15 @@ class MapGrid():
 		#TODO: Remove the party located at (gridx, gridy) from the map.
 		todo = 0
 
+	#Rotate the party located at (gridx, gridy). The angle should be ggparty.UP, ggparty.DOWN, ggparty.LEFT, or ggparty.RIGHT.
 	def rotateParty(self, gridx, gridy, angle):
-		#TODO: Rotate the party located at (gridx, gridy). The angle should be ggparty.UP, ggparty.DOWN, ggparty.LEFT, or ggparty.RIGHT.
-		todo = 0
+		party = getParty(gridx, gridy)
+		if party != -1:
+			for _ in range(4):
+				if party.grid_angle == angle:
+					break
+				else:
+					party.rotatePartyClockwise()
 
 	def simulateShoot(self):
 		#TODO: Check if any of the party members are capable of shooting characters in other player's parties
