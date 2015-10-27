@@ -16,6 +16,7 @@ img_char[1] = pygame.image.load("img/char_1.png")
 img_char[2] = pygame.image.load("img/char_2.png")
 
 # Game Initialization
+pygame.init()
 screen = pygame.display.set_mode((800,600), DOUBLEBUF)
 clock = pygame.time.Clock()
 fps = 60
@@ -47,7 +48,10 @@ while running:
 		# [SCENE] Create Party
 		if current_scene == CREATE_PARTY:
 			partyScene.update(event)
-			partyScene.render(screen)			
+			partyScene.render(screen)	
+
+			if partyScene.isFinished() != -1:
+				switchToScene(GAME_GRID)		
 
 		# [SCENE] Actual Game
 		elif current_scene == GAME_GRID:
@@ -55,3 +59,5 @@ while running:
 			mapScene.renderGrid(screen)
 
 		pygame.display.flip()
+
+pygame.quit()
