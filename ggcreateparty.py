@@ -5,6 +5,13 @@ import ggparty
 #  -- Mouse Buttons
 MOUSE_LEFT = 1
 MOUSE_RIGHT = 3
+#  -- Positioning
+GRIDX = 50
+GRIDY = 50
+CHOICEX = 250
+CHOICEY = 60
+CHOICE_MARGIN = 40
+CHOICE_RECT_MARGIN = 10
 
 # Control for the "Create your party" scene.
 class CreateParty():
@@ -12,8 +19,11 @@ class CreateParty():
 	def __init__(self):
 		self.previewAngle = ggparty.RIGHT
 		self.partyCanvas = ggparty.PartyGrid()
-		self.partyCanvas.gridPosition(25,25)
+		self.partyCanvas.gridPosition(GRIDX,GRIDY)
 		self.selectedChar = ggparty.SINGLE_SHOT
+		self.choiceSprite = [-1 for _ in range(3)]
+		for i in range(3):
+			self.choiceSprite[i] = ggparty.CharacterSprite((CHOICEX+i*(ggparty.CELL_SIZE+CHOICE_MARGIN),CHOICEY), ggparty.UP, i, 0)
 
 
 	def update(self, event):
@@ -29,6 +39,16 @@ class CreateParty():
 				else:
 					# Left clicking on a character in the grid will remove it
 					self.partyCanvas.removeCharacter(gridCoords[0], gridCoords[1])
+
+			elif event.button == MOUSE_LEFT:
+				for i in range(3):
+					# Left clicking on one of the characters in the choice list switches that to the active selected character
+					bounds = self.__getChoiceBounds(i)
+					mp = pygame.mouse.get_pos()
+					if mp[0] > bounds[0] and mp[1] > bounds[1] and mp[0] < bounds[0]+bounds[2] and mp[1] < bounds[1]+bounds[3]:
+						self.selectedChar = i
+						break
+
 
 			elif event.button == MOUSE_RIGHT and gridCoords != (-1,-1):
 				# Right clicking on a character in the grid will rotate them
@@ -49,7 +69,22 @@ class CreateParty():
 				# Draw a preview of the character as they would appear if we placed them where the mouse is hovering
 				if self.partyCanvas.numberOfCharacters() < 2:
 					self.partyCanvas.previewCharacter(self.selectedChar, self.previewAngle, gridCoords[0], gridCoords[1])
+			else:
+				self.partyCanvas.clearGhosts()
 
+
+	def __getChoiceBounds(self, charindex):
+		charwidth = ggparty.CELL_SIZE
+		if charindex == ggparty.SHIELD:
+			charwidth = ggparty.CELL_SIZE*2
+		return (CHOICEX-CHOICE_RECT_MARGIN+charindex*(ggparty.CELL_SIZE+CHOICE_MARGIN),
+				CHOICEY-CHOICE_RECT_MARGIN,
+				charwidth+CHOICE_RECT_MARGIN*2,
+				ggparty.CELL_SIZE*2+CHOICE_RECT_MARGIN*2)
 
 	def render(self, screen):
 		self.partyCanvas.renderGrid(screen)
+		for i in range(3):
+			pygame.sprite.RenderPlain(self.choiceSprite[i]).draw(screen)
+			if self.selectedChar == i:
+				pygame.draw.rect(screen, ggparty.GRID_COLOR, self.__getChoiceBounds(i), 3)

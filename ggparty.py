@@ -162,11 +162,15 @@ class PartyGrid():
 		self.grid_angle = (self.grid_angle-90) % 360
 		for i in range(len(self.party_members)):
 			self.party_members[i].rotateRelative(-90)
-			tempGrid = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+			if self.party_members[i].chartype == SHIELD:
+				gridbound = GRID_SIZE-1
+			else:
+				gridbound = GRID_SIZE
+			tempGrid = [[0 for _ in range(gridbound)] for _ in range(gridbound)]
 			tempGrid[self.party_positions[i][0]][self.party_positions[i][1]] = 1
 			ccwGrid = list(zip(*tempGrid))[::-1]
-			for col in range(GRID_SIZE):
-				for row in range(GRID_SIZE):
+			for col in range(gridbound):
+				for row in range(gridbound):
 					if ccwGrid[col][row] == 1:
 						updatedPosList.append((col,row))
 						break
