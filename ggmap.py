@@ -15,14 +15,51 @@ class MapGrid():
 	#		We need a way to track the health of each of the players.
 	#		We need a way to distinguish between the simulation phase and the input phase.
 	#			(More specifically: Player input phase, AI input phase, Simulation phase)
+	
+	global BLACK
+	global WHITE
+	global GREEN
+	global RED
+	global BOARD_SIZE
+	global CONSOLE_SIZE
+	global WIDTH
+	global HEIGHT
+	global MARGIN
+	global GRID_SIZE
+	global NUM_PLAYERS
+	global WINDOW_SIZE
+	BLACK = (0, 0, 0)
+	WHITE = (255, 255, 255)
+	GREEN = (0, 255, 0)
+	RED = (255, 0, 0)
+ 
+# This sets the WIDTH and HEIGHT of each grid location, as well as the size of the grid
+	BOARD_SIZE = 500;
+	CONSOLE_SIZE = 100;
+	GRID_SIZE = 10
+	WIDTH = BOARD_SIZE*4/(5*GRID_SIZE+1)
+	HEIGHT = BOARD_SIZE*4/(5*GRID_SIZE+1)
+ 
+# This sets the margin between each cell
+	MARGIN = BOARD_SIZE/(5*GRID_SIZE+1)
 
 	def __init__(self, width, height):
 		# This sets the WIDTH and HEIGHT of each grid location and the MARGIN between each cell
 		self.WIDTH = width
 		self.HEIGHT = height
 		self.MARGIN = 5
-
-		self.grid = [[0 for row in range(10)] for column in range(10)]
+		self.grid = []
+		for row in range(GRID_SIZE):
+    # Add an empty array that will hold each cell
+    # in this row
+			 self.grid.append([])
+    			for column in range(GRID_SIZE):
+        			self.grid[row].append(0)  # Append a cell
+ 
+# Set row 1, cell 5 to one. (Remember rows and
+# column numbers start at zero.)
+		#self.grid[1][5] = 1
+		#self.grid = [[0 for row in range(10)] for column in range(10)]
 
 	def update(self, event):
 		#TODO: handling of keyboard input, mouse clicks, etc for the map scene.
@@ -65,7 +102,35 @@ class MapGrid():
 	# Renders the map on screen
 	def renderGrid(self, screen):
 		# Draw the grid
-		for row in range(10):
-			for column in range(10):
-				color = (255,255,255)
-				pygame.draw.rect(screen, color, [(self.MARGIN + self.WIDTH) * column + self.MARGIN, (self.MARGIN + self.HEIGHT) * row + self.MARGIN, self.WIDTH, self.HEIGHT])
+		pygame.init()
+ 
+# Set the HEIGHT and WIDTH of the screen
+		WINDOW_SIZE = [BOARD_SIZE, BOARD_SIZE+CONSOLE_SIZE]
+		screen = pygame.display.set_mode(WINDOW_SIZE)
+ 
+# Set title of screen
+		pygame.display.set_caption("Arena Combat Game")
+		# Loop until the user clicks the close button.
+		done = False
+ 
+# Used to manage how fast the screen updates
+		clock = pygame.time.Clock()
+		delay = 0;
+ 
+# Initialize text outputs
+		myfont = pygame.font.SysFont("arial bold",22)
+		currentalert = []
+
+# Initialize command variables
+		cmd_seq = ["[empty]","[empty]","[empty]"]
+		cmd_id = 0
+		exe = 0
+		showstep = 0
+
+# Initialize graphics
+		hu_img = pygame.image.load('hu_player.png')
+		hu_img = pygame.transform.scale(hu_img, (WIDTH, HEIGHT))
+		ai_img = pygame.image.load('ai_player.png')
+		ai_img = pygame.transform.scale(ai_img, (WIDTH, HEIGHT))
+		explosion = pygame.image.load('explosion.jpg')
+		explosion = pygame.transform.scale(explosion, (WIDTH, HEIGHT))
