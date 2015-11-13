@@ -50,12 +50,12 @@ class MapGrid():
 		self.MARGIN = 5
 		self.grid = []
 		for row in range(GRID_SIZE):
-    # Add an empty array that will hold each cell
-    # in this row
-			 self.grid.append([])
-    			for column in range(GRID_SIZE):
-        			self.grid[row].append(0)  # Append a cell
- 
+			# Add an empty array that will hold each cell
+			# in this row
+			self.grid.append([])
+			for column in range(GRID_SIZE):
+				self.grid[row].append(0)  # Append a cell
+
 # Set row 1, cell 5 to one. (Remember rows and
 # column numbers start at zero.)
 		#self.grid[1][5] = 1
