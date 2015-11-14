@@ -317,7 +317,7 @@ class PartyGrid():
 	def resizeGrid(self, width, height, margin):
 		global CELL_SIZE
 		CELL_SIZE = width + margin
-		self.facing_indicator = 0 # do not show the grid facing arrow
+		#self.facing_indicator = 0 # do not show the grid facing arrow
 		for member in self.party_members:
 			member.scale(width, height, margin)
 	
