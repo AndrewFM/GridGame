@@ -1,7 +1,6 @@
 import pygame
 import ggparty
 import ggutils
-import ggai
 
 # Enums/Constants
 #  -- Mouse Buttons
@@ -9,6 +8,7 @@ MOUSE_LEFT = 1
 MOUSE_RIGHT = 3
 #  -- Colors
 INACTIVE_COLOR = (180,180,180)
+UI_COLOR = ggparty.BLACK
 #  -- Positioning
 GRIDX = 170
 GRIDY = 200
@@ -36,15 +36,15 @@ class CreateParty():
 
 		self.fontTitle = pygame.font.SysFont("Verdana", 28, bold=1)
 		self.fontBasic =  pygame.font.SysFont("Verdana", 14)
-		self.strTitle = self.fontTitle.render("Construct Your Party", 1, ggparty.GRID_COLOR)
+		self.strTitle = self.fontTitle.render("Construct Your Party", 1, UI_COLOR)
 		self.strCharDesc = []
-		self.strCharDesc.append(self.fontBasic.render("Shoots in one direction, adds 2 health points.", 0, ggparty.GRID_COLOR))
-		self.strCharDesc.append(self.fontBasic.render("Shoots in two directions, adds 1 health point.", 0, ggparty.GRID_COLOR))
-		self.strCharDesc.append(self.fontBasic.render("Cannot shoot at all, adds 5 health points.", 0, ggparty.GRID_COLOR))
+		self.strCharDesc.append(self.fontBasic.render("Shoots in one direction, adds 2 health points.", 0, UI_COLOR))
+		self.strCharDesc.append(self.fontBasic.render("Shoots in two directions, adds 1 health point.", 0, UI_COLOR))
+		self.strCharDesc.append(self.fontBasic.render("Cannot shoot at all, adds 5 health points.", 0, UI_COLOR))
 		self.strButton = []
 		self.strButton.append(self.fontBasic.render("Two Remaining", 0, INACTIVE_COLOR))
 		self.strButton.append(self.fontBasic.render("One Remaining", 0, INACTIVE_COLOR))
-		self.strButton.append(self.fontBasic.render("Finish", 0, ggparty.GRID_COLOR))
+		self.strButton.append(self.fontBasic.render("Finish", 0, UI_COLOR))
 
 
 	def update(self, event):
@@ -128,14 +128,14 @@ class CreateParty():
 		# Party Grid
 		self.partyCanvas.renderGrid(screen)
 
-		# Character Selection Area
+		# Character Selection
 		for i in range(3):
 			pygame.sprite.RenderPlain(self.choiceSprite[i]).draw(screen)
 			if self.selectedChar == i:
-				pygame.draw.rect(screen, ggparty.GRID_COLOR, self.__getChoiceBounds(i), 3)
+				pygame.draw.rect(screen, UI_COLOR, self.__getChoiceBounds(i), 3)
 
 		# Finish Button
-		pygame.draw.rect(screen, ggparty.GRID_COLOR, FINISH_BUTTON_BOUNDS, 3)
+		pygame.draw.rect(screen, UI_COLOR, FINISH_BUTTON_BOUNDS, 3)
 		buttonText = self.strButton[self.partyCanvas.numberOfCharacters()]
 		screen.blit(buttonText, 
 			(FINISH_BUTTON_BOUNDS[0]+FINISH_BUTTON_BOUNDS[2]/2-buttonText.get_width()/2

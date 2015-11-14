@@ -14,7 +14,11 @@ DOWN = 270
 #  -- Grid Attributes
 GRID_SIZE = 3  # In number of cells
 CELL_SIZE = 32 # In pixels
-GRID_COLOR = (0,0,0)
+BLACK = (0,0,0)
+RED = (255,0,0)
+GREEN = (0,255,0)
+BLUE = (0,0,255)
+#gridColor = BLACK
 GRID_ARROW_SIZE = 16 # In pixels
 
 # Representation of a single character within a party.
@@ -34,10 +38,28 @@ class CharacterSprite(pygame.sprite.Sprite):
 		self.rotate(angle)
 		self.rect = self.image.get_rect()
 		self.rect.topleft = position
+		self.facing = [] # This needs to mean something.
 
 	def rotate(self, angle):
 		self.rotation = angle
 		self.image = pygame.transform.rotate(self.src_image, angle)
+	
+	def scale(self, cellWidth, cellHeight, margin):
+		dimensions = pygame.Surface.get_size(self.image)
+		source_dimensions = pygame.Surface.get_size(self.src_image)
+		if self.chartype == 0:	# 1x1
+			shapeWidth = cellWidth
+			shapeHeight = cellHeight
+		elif self.chartype == 2: # 2x2
+			shapeWidth = cellWidth*2 + margin
+			shapeHeight = cellHeight*2 + margin
+		elif dimensions[0] < dimensions [1]: # 1x2, has two different facings. First, vertical.
+			shapeWidth = cellWidth
+			shapeHeight = cellHeight*2 + margin
+		else: # now, horizontal
+			shapeWidth = cellWidth*2 + margin
+			shapeHeight = cellHeight			
+		self.image = pygame.transform.scale(self.image, (shapeWidth, shapeHeight))
 
 	#Increment the current rotation by some amount
 	def rotateRelative(self, angle):
@@ -50,10 +72,17 @@ class PartyGrid():
 
 	def __init__(self):
 		self.grid_position = (0,0)
+		self.supergrid_location = [0,0]
 		self.grid_angle = RIGHT	   # Facing direction of the entire party grid as a whole
 		self.party_members = []    # Contains CharacterSprite elements. Must be in parallel with array below.
 		self.party_positions = []  # Contains (gridx, gridy) elements. Must be in parallel with array above.
 		self.grid_contents = [[(0,0,-1) for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] # Contains Character enum elements & grid pos of source character.
+		self.grid_color = BLACK
+		self.health = []
+		self.facing_indicator = 1
+		self.cmd_seq = ["[empty]","[empty]","[empty]"]
+		self.cmd_id = 0
+		self.alive = 1
 		# Hardcoding the global rotation translations for the 1x2 character for now
 		# ... because I'm not totally sure how to do it programatically
 		self.double_posmapUD = [ #Up/Down to Left/Right
@@ -64,7 +93,7 @@ class PartyGrid():
 			[(2,0),(2,1),(-1,-1)],
 			[(1,0),(1,1),(-1,-1)],
 			[(0,0),(0,1),(-1,-1)]
-		]	
+		]
 
 	# Returns 1 if the character was successfully inserted, 0 otherwise.
 	# Angles should be in degrees, should be between 0 and 2pi, and should always be multiples of pi/2.
@@ -125,7 +154,7 @@ class PartyGrid():
 	def removeCharacter(self, gridx, gridy):
 		updatedCharList = []
 		updatedPosList = []
-		removePos = (self.grid_contents[gridx][gridy][0], self.grid_contents[gridx][gridy][1])
+		removePos = (self.grid_contents[int(gridx)][int(gridy)][0], self.grid_contents[int(gridx)][int(gridy)][1])
 		for i in range(len(self.party_members)):
 			if self.party_positions[i] != removePos:
 				updatedCharList.append(self.party_members[i])
@@ -147,14 +176,14 @@ class PartyGrid():
 	def getCharacter(self, gridx, gridy):
 		if gridx < 0 or gridy < 0 or gridx >= GRID_SIZE or gridy >= GRID_SIZE:
 			return -1
-		return self.grid_contents[gridx][gridy][2]
+		return self.grid_contents[int(gridx)][int(gridy)][2]
 
 	# Rotates the character at (gridx, gridy) counter-clockwise 90 degrees.
 	# Returns 1 if the rotation was successful, 0 otherwise.
 	def rotateCharacterAt(self, gridx, gridy):
 		if self.getCharacter(gridx, gridy) == -1:
 			return 0
-		findPosition = (self.grid_contents[gridx][gridy][0], self.grid_contents[gridx][gridy][1])
+		findPosition = (self.grid_contents[int(gridx)][int(gridy)][0], self.grid_contents[int(gridx)][int(gridy)][1])
 		for i in range(len(self.party_positions)):
 			if self.party_positions[i] == findPosition:
 				if self.party_members[i].chartype == DOUBLE_SHOT:
@@ -191,7 +220,7 @@ class PartyGrid():
 				else:
 					gridbound = GRID_SIZE
 				tempGrid = [[0 for _ in range(gridbound)] for _ in range(gridbound)]
-				tempGrid[self.party_positions[i][0]][self.party_positions[i][1]] = 1
+				tempGrid[int(self.party_positions[i][0])][int(self.party_positions[i][1])] = 1
 				ccwGrid = list(zip(*tempGrid))[::-1]
 				for col in range(gridbound):
 					for row in range(gridbound):
@@ -201,11 +230,11 @@ class PartyGrid():
 			else:
 				#1x2 Character requires special rotation handling.
 				if self.party_members[i].rotation == LEFT or self.party_members[i].rotation == RIGHT:
-					updatedPosList.append((self.double_posmapUD[self.party_positions[i][1]][self.party_positions[i][0]][0]
-										 ,self.double_posmapUD[self.party_positions[i][1]][self.party_positions[i][0]][1]))
+					updatedPosList.append((self.double_posmapUD[int(self.party_positions[i][1])][int(self.party_positions[i][0])][0]
+										 ,self.double_posmapUD[int(self.party_positions[i][1])][int(self.party_positions[i][0])][1]))
 				else:
-					updatedPosList.append((self.double_posmapLR[self.party_positions[i][1]][self.party_positions[i][0]][0]
-					 					 ,self.double_posmapLR[self.party_positions[i][1]][self.party_positions[i][0]][1]))
+					updatedPosList.append((self.double_posmapLR[int(self.party_positions[i][1])][int(self.party_positions[i][0])][0]
+					 					 ,self.double_posmapLR[int(self.party_positions[i][1])][int(self.party_positions[i][0])][1]))
 
 		self.party_positions = updatedPosList
 		self.__updateGrid()
@@ -227,7 +256,7 @@ class PartyGrid():
 					ct = self.party_members[i].chartype
 				else:
 					ct = -1
-				self.grid_contents[cell[0]][cell[1]] = (self.party_positions[i][0], self.party_positions[i][1], ct)
+				self.grid_contents[int(cell[0])][int(cell[1])] = (self.party_positions[i][0], self.party_positions[i][1], ct)
 			# Update where on the screen this character will be drawn
 			self.party_members[i].rect.topleft = (self.grid_position[0]+self.party_positions[i][0]*CELL_SIZE,self.grid_position[1]+self.party_positions[i][1]*CELL_SIZE)
 
@@ -243,31 +272,53 @@ class PartyGrid():
 	# Renders the grid on screen
 
 	def renderGrid(self, screen):
-		pygame.draw.rect(screen, GRID_COLOR, (self.grid_position[0], self.grid_position[1]
+		pygame.draw.rect(screen, self.grid_color, (self.grid_position[0], self.grid_position[1]
 			                   , GRID_SIZE*CELL_SIZE, GRID_SIZE*CELL_SIZE), 3)
 		for row in range(1,GRID_SIZE):
-			pygame.draw.line(screen, GRID_COLOR, (self.grid_position[0], self.grid_position[1]+row*CELL_SIZE)
+			pygame.draw.line(screen, self.grid_color, (self.grid_position[0], self.grid_position[1]+row*CELL_SIZE)
 				                               , (self.grid_position[0]+GRID_SIZE*CELL_SIZE, self.grid_position[1]+row*CELL_SIZE), 1)
 		for col in range(1,GRID_SIZE):
-			pygame.draw.line(screen, GRID_COLOR, (self.grid_position[0]+col*CELL_SIZE, self.grid_position[1])
+			pygame.draw.line(screen, self.grid_color, (self.grid_position[0]+col*CELL_SIZE, self.grid_position[1])
 				                               , (self.grid_position[0]+col*CELL_SIZE, self.grid_position[1]+GRID_SIZE*CELL_SIZE), 1)
-
-		if self.grid_angle == RIGHT:
-			pygame.draw.polygon(screen, GRID_COLOR, ((self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1])
-				,(self.grid_position[0]+GRID_SIZE*CELL_SIZE+GRID_ARROW_SIZE,self.grid_position[1]+(GRID_SIZE*CELL_SIZE)/2)
-				,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
-		elif self.grid_angle == UP:
-			pygame.draw.polygon(screen, GRID_COLOR, ((self.grid_position[0],self.grid_position[1])
-				,(self.grid_position[0]+(GRID_SIZE*CELL_SIZE)/2,self.grid_position[1]-GRID_ARROW_SIZE)
-				,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1])), 0)
-		elif self.grid_angle == LEFT:
-			pygame.draw.polygon(screen, GRID_COLOR, ((self.grid_position[0],self.grid_position[1])
-				,(self.grid_position[0]-GRID_ARROW_SIZE,self.grid_position[1]+(GRID_SIZE*CELL_SIZE)/2)
-				,(self.grid_position[0],self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
-		elif self.grid_angle == DOWN:
-			pygame.draw.polygon(screen, GRID_COLOR, ((self.grid_position[0],self.grid_position[1]+GRID_SIZE*CELL_SIZE)
-				,(self.grid_position[0]+(GRID_SIZE*CELL_SIZE)/2,self.grid_position[1]+GRID_SIZE*CELL_SIZE+GRID_ARROW_SIZE)
-				,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
+		if self.facing_indicator == 1:
+			if self.grid_angle == RIGHT:
+				pygame.draw.polygon(screen, self.grid_color, ((self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1])
+					,(self.grid_position[0]+GRID_SIZE*CELL_SIZE+GRID_ARROW_SIZE,self.grid_position[1]+(GRID_SIZE*CELL_SIZE)/2)
+					,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
+			elif self.grid_angle == UP:
+				pygame.draw.polygon(screen, self.grid_color, ((self.grid_position[0],self.grid_position[1])
+					,(self.grid_position[0]+(GRID_SIZE*CELL_SIZE)/2,self.grid_position[1]-GRID_ARROW_SIZE)
+					,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1])), 0)
+			elif self.grid_angle == LEFT:
+				pygame.draw.polygon(screen, self.grid_color, ((self.grid_position[0],self.grid_position[1])
+					,(self.grid_position[0]-GRID_ARROW_SIZE,self.grid_position[1]+(GRID_SIZE*CELL_SIZE)/2)
+					,(self.grid_position[0],self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
+			elif self.grid_angle == DOWN:
+				pygame.draw.polygon(screen, self.grid_color, ((self.grid_position[0],self.grid_position[1]+GRID_SIZE*CELL_SIZE)
+					,(self.grid_position[0]+(GRID_SIZE*CELL_SIZE)/2,self.grid_position[1]+GRID_SIZE*CELL_SIZE+GRID_ARROW_SIZE)
+					,(self.grid_position[0]+GRID_SIZE*CELL_SIZE,self.grid_position[1]+GRID_SIZE*CELL_SIZE)), 0)
 
 		for member in self.party_members:
 			pygame.sprite.RenderPlain(member).draw(screen)
+	
+	# resize the grid based on the side of the board
+	def resizeGrid(self, width, height, margin):
+		global CELL_SIZE
+		CELL_SIZE = width + margin
+		self.facing_indicator = 0 # do not show the grid facing arrow
+		for member in self.party_members:
+			member.scale(width, height, margin)
+	
+	def maxHealth(self):
+		# type 0 = 2 health
+		# type 1 = 1 health
+		# type 2 = 4 health
+		self.health = 0
+		for element in self.party_members:
+			if element.chartype == 0:
+				self.health += 20
+			elif element.chartype == 1:
+				self.health +=10
+			elif element.chartype == 2:
+				self.health += 40
+	
