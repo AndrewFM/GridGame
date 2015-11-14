@@ -164,20 +164,6 @@ class MapGrid():
 		screen.blit(label,((MARGIN + WIDTH) * column + MARGIN,
 							(MARGIN + HEIGHT) * row + MARGIN))
 
-	def getParty(self, gridx, gridy):
-		#TODO: Return the party located at (gridx, gridy) on the map, or -1 if no party is located at that position.
-		todo = 0
-		return -1
-
-	def moveParty(self, sourcex, sourcey, destx, desty):
-		#TODO: Move the party located at (sourcex, sourcey) to (destx, desty)
-		#Alternately, you can implement functions for moving up/left/down/right by one grid cell
-		todo = 0
-
-	def removeParty(self, gridx, gridy):
-		#TODO: Remove the party located at (gridx, gridy) from the map.
-		todo = 0
-
 	#Rotate the party located at (gridx, gridy). The angle should be ggparty.UP, ggparty.DOWN, ggparty.LEFT, or ggparty.RIGHT.
 	def rotateParty(self, gridx, gridy, angle):
 		party = getParty(gridx, gridy)
@@ -187,10 +173,6 @@ class MapGrid():
 					break
 				else:
 					party.rotatePartyClockwise()
-
-	def simulateShoot(self):
-		#TODO: Check if any of the party members are capable of shooting characters in other player's parties
-		todo = 0
 
 	# Renders the map on screen
 	def renderGrid(self, screen):

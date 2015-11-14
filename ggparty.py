@@ -95,6 +95,18 @@ class PartyGrid():
 			[(0,0),(0,1),(-1,-1)]
 		]
 
+	# Returns the coordinates of all occupied cells
+	def getOccupiedCells(self):
+		coordList = []
+		for i in range(self.numberOfCharacters()):
+			member = self.party_members[i]
+			pos = self.party_positions[i]
+			for coord in self.__determineOccupyingCells(member.chartype, member.rotation, pos[0], pos[1]):
+				coord = (coord[1],coord[0])
+				coordList.append(coord)
+		return coordList
+
+		
 	# Returns 1 if the character was successfully inserted, 0 otherwise.
 	# Angles should be in degrees, should be between 0 and 2pi, and should always be multiples of pi/2.
 	def appendCharacter(self, chartype, angle, gridx, gridy):
@@ -310,15 +322,16 @@ class PartyGrid():
 			member.scale(width, height, margin)
 	
 	def maxHealth(self):
-		# type 0 = 2 health
-		# type 1 = 1 health
-		# type 2 = 4 health
+		# raking is hitting multiple squares of the same element. it hurts.
+		# type 0 = 20 health
+		# type 1 = 20 health, can be raked
+		# type 2 = 80 health, can be raked
 		self.health = 0
 		for element in self.party_members:
 			if element.chartype == 0:
 				self.health += 20
 			elif element.chartype == 1:
-				self.health +=10
+				self.health += 20
 			elif element.chartype == 2:
-				self.health += 40
+				self.health += 80
 	

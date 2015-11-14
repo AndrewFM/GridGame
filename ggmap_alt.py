@@ -54,7 +54,7 @@ global MARGIN
 global GRID_SIZE
 global NUM_PLAYERS
 global WINDOW_SIZE
-	
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -67,7 +67,7 @@ CONSOLE_SIZE = 100;
 GRID_SIZE = 10
 WIDTH = BOARD_SIZE*4/(5*GRID_SIZE+1)
 HEIGHT = BOARD_SIZE*4/(5*GRID_SIZE+1)
- 
+
 # This sets the margin between each cell
 MARGIN = BOARD_SIZE/(5*GRID_SIZE+1)
 
@@ -87,17 +87,13 @@ class player:
  
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
-grid = []
-for row in range(GRID_SIZE):
+#grid = []
+#for row in range(GRID_SIZE):
     # Add an empty array that will hold each cell
     # in this row
-    grid.append([])
-    for column in range(GRID_SIZE):
-        grid[row].append(0)  # Append a cell
- 
-# Set row 1, cell 5 to one. (Remember rows and
-# column numbers start at zero.)
-grid[1][5] = 1
+#    grid.append([])
+#    for column in range(GRID_SIZE):
+#        grid[row].append(0)  # Append a cell
 
 # Initialize player start locations and status
 NUM_PLAYERS = 3 # 1-4
@@ -134,7 +130,7 @@ clock = pygame.time.Clock()
 delay = 0;
  
 # Initialize text outputs
-myfont = pygame.font.SysFont("arial bold",22)
+myfont = pygame.font.SysFont("arial bold",BOARD_SIZE/15)
 currentalert = []
 
 # Initialize command variables
@@ -157,11 +153,11 @@ while not done:
 	# Check victory and defeat conditions
 	if max(player.status) < 1:
 		currentalert = 'Game over'
-		delay = 2000
+		delay = 3000
 		done = True
 	elif len([x for x in player.status if x >= 0]) == 1:
 		currentalert = 'You win!'
-		delay = 2000
+		delay = 3000
 		done = True
 
 	for event in pygame.event.get():  # User did something
@@ -173,7 +169,7 @@ while not done:
 				cmd_seq[cmd_id] = "[empty]" # Remove last entered command
 			elif event.key == pygame.K_RETURN: # If key is return
 				currentalert = [] # Clear current alert
-				exe = 1 # We're now in the executuon phase
+				exe = 1 # We're now in the execution phase
 				AI = ggai.AIOpponent()
 				AIcmds = []
 				player.loc_intermediate = []
@@ -256,7 +252,7 @@ while not done:
 	for command in cmd_seq:
 		label = myfont.render(command,1,BLACK)
 		screen.blit(label, (MARGIN, BOARD_SIZE+offset))
-		offset += 15
+		offset += BOARD_SIZE/20
 	# Write current alert into input console
 	alert(currentalert)
 	
@@ -278,8 +274,8 @@ while not done:
  
     # Go ahead and update the screen with what we've drawn.
 	pygame.display.flip()
-	pygame.time.wait(delay)
- 
+	pygame.time.wait(delay) # Wait if told to do so
+
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
 pygame.quit()
