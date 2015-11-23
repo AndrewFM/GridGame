@@ -5,11 +5,13 @@ import ggparty
 # AI logic for the opponent(s)
 class AIOpponent():
 	
-	def __init__(self):
-		# ...
-		nothing = 0
+	def __init__(self, myID):
+		self.myID = myID	   # An integer referring to the index of my party in the party array that will be passed to all the functions
 
-	def decideMoves(self, map):
+	# parties is a list of all ggparty.PartyGrid objects on the game board.
+	# parties[self.myID] is your party.
+	# all other parties[i], where 0 <= i < len(parties), and i != self.myID are the opponent parties. 
+	def decideMoves(self, parties):
 		# Return a sequence of three moves
 		import random
 		moves = 3;

@@ -71,6 +71,7 @@ class CharacterSprite(pygame.sprite.Sprite):
 class PartyGrid():
 
 	def __init__(self):
+		self.ai_control = 0		   # Set to 0 if human controlled, set to an ggai.AIOpponent object if AI controlled.
 		self.grid_position = (0,0)
 		self.supergrid_location = [0,0]
 		self.grid_angle = RIGHT	   # Facing direction of the entire party grid as a whole
@@ -94,6 +95,17 @@ class PartyGrid():
 			[(1,0),(1,1),(-1,-1)],
 			[(0,0),(0,1),(-1,-1)]
 		]
+
+	# Assign an AI controller to this party
+	def assignAI(self, aiobject):
+		self.ai_control = aiobject
+
+	# Is this party AI controller or not?
+	def isAI(self):
+		if self.ai_control == 0:
+			return 0
+		else:
+			return 1
 
 	# Returns the coordinates of all occupied cells
 	def getOccupiedCells(self):

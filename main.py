@@ -5,6 +5,7 @@ import ggcreateparty
 import ggmap
 import ggparty
 import ggai
+import ggutils
 
 # Enums/Constants
 #  -- Scenes
@@ -64,49 +65,55 @@ while running:
 			partyScene.render(screen)	
 
 			huPlayer = partyScene.isFinished()
-			aiPlayers = []
-			for i in range(NUM_AI_PLAYERS):
-				aiPlayers.append(ggai.constructParty())
+			gamePlayers = []
+
 			# huParty.party_members[x].chartype gives element type
 			# '' .rotation gives element angle
 			# huParty.party_position[x]
 			# CharacterSprite class in ggparty has this info
 			if huPlayer != -1:
-				switchToScene(GAME_GRID)
-				mapScene.addPartyToMap(huPlayer,ggparty.UP,starts[0][0],starts[0][1])
-				huPlayer.grid_color = ggparty.BLUE
-				huPlayer.maxHealth()
+				gamePlayers.append(huPlayer)
+				# Generate the contents of the AI agents' parties, and assign them an AI controller.
 				for i in range(NUM_AI_PLAYERS):
-					mapScene.addPartyToMap(aiPlayers[i],ggparty.UP,starts[i+1][0],starts[i+1][1])
-					aiPlayers[i].grid_color = ggparty.RED
-					aiPlayers[i].maxHealth()
+					party = ggai.constructParty()
+					party.assignAI(ggai.AIOpponent(i+1))
+					gamePlayers.append(party)
+				
+				switchToScene(GAME_GRID)
+				for i in range(len(gamePlayers)):
+					mapScene.addPartyToMap(gamePlayers[i],ggparty.UP,starts[i][0],starts[i][1])
+					if gamePlayers[i].isAI() == 0:
+						gamePlayers[i].grid_color = ggparty.BLUE
+					else:
+						gamePlayers[i].grid_color = ggparty.RED
+					gamePlayers[i].maxHealth()
 		
 
 		
 		
 		# [SCENE] Actual Game
 		elif current_scene == GAME_GRID:
-			running = mapScene.update(event, screen, huPlayer, aiPlayers)
+			running = mapScene.update(event, screen, gamePlayers)
 			
 			# Check victory and defeat conditions
-			if huPlayer.alive == 0:
+			if len([x for x in gamePlayers if x.alive == 1 and x.isAI() == 0]) == 0:
 				currentalert = 'Game over'
 				delay = 3000
 				running = 0
-			elif len([x for x in aiPlayers if x.alive == 1]) == 0:
+			elif len([x for x in gamePlayers if x.alive == 1 and x.isAI() == 1]) == 0:
 				currentalert = 'You win!'
 				delay = 3000
 				running = 0
 			
 			
+			huPlayer = ggutils.getHumanPlayer(gamePlayers)
 			mapScene.renderGrid(screen)
 			mapScene.renderConsole(screen, huPlayer, currentalert)
 			if mapScene.exe == 0:
-				mapScene.drawParty(screen, huPlayer)
-				for currentAI in aiPlayers:
-					mapScene.drawParty(screen, currentAI)
+				for party in gamePlayers:
+					mapScene.drawParty(screen, party)
 			else: # execute step
-				mapScene.executeStep(screen, huPlayer, aiPlayers, step)
+				mapScene.executeStep(screen, gamePlayers, step)
 				step += 1
 			
 			if step >= 3: # If we've done all 3 steps, end the execution phase
@@ -115,12 +122,11 @@ while running:
 				huPlayer.cmd_seq = ["[empty]","[empty]","[empty]"]
 				huPlayer.cmd_id = 0
 		
-			if huPlayer.health <= 0:
-				huPlayer.alive = 0
-			for currentAI in aiPlayers:
-				if currentAI.health <= 0:
-					currentAI.alive = 0
-					currentAI.supergrid_location = [-10,-10]
+			for party in gamePlayers:
+				if party.health <= 0:
+					party.alive = 0
+					if party.isAI() == 1:
+						party.supergrid_location = [-10,-10]
 			
 
 		pygame.display.flip()

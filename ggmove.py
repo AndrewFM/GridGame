@@ -61,14 +61,11 @@ class Move():
 		screen.blit(self.explosion,((ggmap.MARGIN + ggmap.WIDTH) * tarloc[1] + ggmap.MARGIN,
 				(ggmap.MARGIN + ggmap.HEIGHT) * tarloc[0] + ggmap.MARGIN))
 	
-	def attack(self, attackingPlayer, huPlayer, aiPlayers, screen):
+	def attack(self, attackingPlayer, allPlayers, screen):
 		# Takes the player locations and facing and checks to see if there are any valid attacks
-		# If there are valid attacks, resolve them
-		
-		allPlayers = aiPlayers + [huPlayer]
-		
+		# If there are valid attacks, resolve them		
 		for attacker in range(2):
-			if attackingPlayer.party_members[attacker].chartype == 0:
+			if attackingPlayer.party_members[attacker].chartype == ggparty.SINGLE_SHOT:
 				for targetPlayer in allPlayers:
 					target_locs_local = targetPlayer.getOccupiedCells()
 					for target in target_locs_local:
@@ -97,7 +94,7 @@ class Move():
 							targetPlayer.health -= self.damage
 							self.drawAttack(atkloc, tarloc, screen)
 						
-			elif attackingPlayer.party_members[attacker].chartype == 1:
+			elif attackingPlayer.party_members[attacker].chartype == ggparty.DOUBLE_SHOT:
 				for targetPlayer in allPlayers:
 					target_locs_local = targetPlayer.getOccupiedCells()
 					for target in target_locs_local:

@@ -3,6 +3,7 @@ import pygame
 import ggparty
 import ggai
 import ggmove
+import ggutils
 from copy import deepcopy
 
 # Enums/Constants
@@ -87,16 +88,14 @@ class MapGrid():
 		currentalert = []
 
 	# Initialize command variables
-		self.AI = ggai.AIOpponent()
 		self.mstep = ggmove.Move()
 		
 # Set row 1, cell 5 to one. (Remember rows and
 # column numbers start at zero.)
 		self.grid = [[0 for row in range(10)] for column in range(10)]
 
-	def update(self, event, screen, huPlayer, aiPlayers):
-		#TODO: handling of keyboard input, mouse clicks, etc for the map scene.
-		# Particuarly, inputting the movement sequences, and clicking the buttons to go to the simulation phase.
+	def update(self, event, screen, gamePlayers):
+		huPlayer = ggutils.getHumanPlayer(gamePlayers)
 		if event.type == pygame.QUIT:  # If user clicked close
 			return 0  # Flag that we are done so we exit this loop
 		elif event.type == pygame.KEYDOWN: # If user presses a key
@@ -107,8 +106,9 @@ class MapGrid():
 				self.atklocs_seq = []
 				currentalert = [] # Clear current alert
 				self.exe = 1 # We're now in the execution phase
-				for currentAI in aiPlayers:
-					currentAI.cmd_seq = self.AI.decideMoves('this doesnt matter yet') # get AI commands for each step
+				for party in gamePlayers:
+					if party.isAI() == 1:
+						party.cmd_seq = party.ai_control.decideMoves(gamePlayers) # get AI commands for each step
 			elif huPlayer.cmd_id < 3:
 				if event.key == pygame.K_UP: # Directional arrow keys
 					huPlayer.cmd_seq[huPlayer.cmd_id] = "UP" # Add corresponding command to the sequence
@@ -129,18 +129,17 @@ class MapGrid():
 		
 		return 1
 	
-	def executeStep(self, screen, huPlayer, aiPlayers, step):
+	def executeStep(self, screen, gamePlayers, step):
 		atklocs = []
-		# For human player
-		self.mstep.oneStep(huPlayer,huPlayer.cmd_seq[step])
-		self.drawParty(screen, huPlayer)
-		
-		# For AI players
-		for currentAI in aiPlayers:
-			self.mstep.oneStep(currentAI,currentAI.cmd_seq[step])
-			self.drawParty(screen, currentAI)
-			self.mstep.attack(currentAI, huPlayer, aiPlayers, screen)
-		self.mstep.attack(huPlayer, huPlayer, aiPlayers, screen)
+		huPlayer = ggutils.getHumanPlayer(gamePlayers)
+
+		# Have all parties move one step
+		for party in gamePlayers:
+			self.mstep.oneStep(party,party.cmd_seq[step])
+			self.drawParty(screen, party)
+		# Once everyone has moved, have all parties shoot
+		for party in gamePlayers:
+			self.mstep.attack(party, gamePlayers, screen)
 		
 		pygame.display.flip()	
 		pygame.time.wait(500) # Wait between showing each step. Time is in milliseconds.
