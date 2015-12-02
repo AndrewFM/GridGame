@@ -1,5 +1,9 @@
 import pygame
 import math
+import numpy as np
+import copy
+import ggmove
+import ggparty
 
 # Enums/Constants
 #  -- Character Types
@@ -43,7 +47,7 @@ class CharacterSprite(pygame.sprite.Sprite):
 	def rotate(self, angle):
 		self.rotation = angle
 		self.image = pygame.transform.rotate(self.src_image, angle)
-	
+			
 	def scale(self, cellWidth, cellHeight, margin):
 		dimensions = pygame.Surface.get_size(self.image)
 		source_dimensions = pygame.Surface.get_size(self.src_image)
@@ -66,11 +70,11 @@ class CharacterSprite(pygame.sprite.Sprite):
 		newdegrees = (self.rotation + angle) % 360
 		self.rotate(newdegrees)
 
-
 # Data Structure for 3x3 Character Parties
 class PartyGrid():
 
 	def __init__(self):
+		self.ai_control = 0		   # Set to 0 if human controlled, set to an ggai.AIOpponent object if AI controlled.
 		self.grid_position = (0,0)
 		self.supergrid_location = [0,0]
 		self.grid_angle = RIGHT	   # Facing direction of the entire party grid as a whole
@@ -94,6 +98,17 @@ class PartyGrid():
 			[(1,0),(1,1),(-1,-1)],
 			[(0,0),(0,1),(-1,-1)]
 		]
+
+	# Assign an AI controller to this party
+	def assignAI(self, aiobject):
+		self.ai_control = aiobject
+
+	# Is this party AI controller or not?
+	def isAI(self):
+		if self.ai_control == 0:
+			return 0
+		else:
+			return 1
 
 	# Returns the coordinates of all occupied cells
 	def getOccupiedCells(self):
@@ -317,7 +332,7 @@ class PartyGrid():
 	def resizeGrid(self, width, height, margin):
 		global CELL_SIZE
 		CELL_SIZE = width + margin
-		self.facing_indicator = 0 # do not show the grid facing arrow
+		#self.facing_indicator = 0 # do not show the grid facing arrow
 		for member in self.party_members:
 			member.scale(width, height, margin)
 	

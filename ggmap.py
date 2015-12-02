@@ -108,7 +108,7 @@ class MapGrid():
 				currentalert = [] # Clear current alert
 				self.exe = 1 # We're now in the execution phase
 				for currentAI in aiPlayers:
-					currentAI.cmd_seq = self.AI.decideMoves('this doesnt matter yet') # get AI commands for each step
+					currentAI.cmd_seq = self.AI.decideMoves(currentAI, aiPlayers + [huPlayer]) # get AI commands for each step
 			elif huPlayer.cmd_id < 3:
 				if event.key == pygame.K_UP: # Directional arrow keys
 					huPlayer.cmd_seq[huPlayer.cmd_id] = "UP" # Add corresponding command to the sequence

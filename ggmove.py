@@ -25,6 +25,8 @@ class Move():
 			diff -= 90
 		player.resizeGrid(ggmap.WIDTH, ggmap.HEIGHT, ggmap.MARGIN)
 	
+	
+	
 	def oneStep(self, player, cmd):
 		# Takes the player locations and the commands from each player
 		# Computes the player locations after each command and outputs new player locations
@@ -65,6 +67,8 @@ class Move():
 		# Takes the player locations and facing and checks to see if there are any valid attacks
 		# If there are valid attacks, resolve them
 		
+		# if screen == 0, don't draw anything
+		
 		allPlayers = aiPlayers + [huPlayer]
 		
 		for attacker in range(2):
@@ -95,7 +99,8 @@ class Move():
 							match_vert = tarloc[0] == atkloc[0]
 						if match_horz & match_vert:
 							targetPlayer.health -= self.damage
-							self.drawAttack(atkloc, tarloc, screen)
+							if screen != 0:
+								self.drawAttack(atkloc, tarloc, screen)
 						
 			elif attackingPlayer.party_members[attacker].chartype == 1:
 				for targetPlayer in allPlayers:
@@ -124,4 +129,5 @@ class Move():
 							match_vert = tarloc[0] == atkloc[0]
 						if match_horz & match_vert:
 							targetPlayer.health -= self.damage
-							self.drawAttack(atkloc, tarloc, screen)
+							if screen != 0:
+								self.drawAttack(atkloc, tarloc, screen)
