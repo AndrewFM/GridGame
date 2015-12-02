@@ -6,3 +6,9 @@ def pointInRect(point, rect):
 		return 1
 	else:
 		return 0
+
+def getHumanPlayer(partyList):
+	for party in partyList:
+		if party.isAI() == 0:
+			return party
+	return 0
