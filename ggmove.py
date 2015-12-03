@@ -70,22 +70,18 @@ class Move():
 		# if screen == 0, don't draw anything
 		
 		allPlayers = aiPlayers + [huPlayer]
-		
+		allOccupied = [(player.getSupergridCells(), player) for player in allPlayers if player != attackingPlayer]
+
 		for attacker in range(2):
-			if attackingPlayer.party_members[attacker].chartype == 0:
-				for targetPlayer in allPlayers:
-					target_locs_local = targetPlayer.getOccupiedCells()
-					for target in target_locs_local:
+			if attackingPlayer.party_members[attacker].chartype == ggparty.SINGLE_SHOT:
+				for targets in allOccupied:
+					for tarloc in targets[0]:
 						match_horz = False
 						match_vert = False
-						atkloc_local = attackingPlayer.party_positions[attacker]
-						atkloc_local = (atkloc_local[1],atkloc_local[0])
-						atkloc = [sum(x) for x in zip(attackingPlayer.supergrid_location, atkloc_local)]
-						tarloc = [sum(x) for x in zip(targetPlayer.supergrid_location, target)]
 						element_facing = attackingPlayer.party_members[attacker].rotation
-						if attackingPlayer == targetPlayer: # Don't shoot yourself
-							pass
-						elif element_facing == ggparty.UP:
+						atkloc = (attackingPlayer.party_positions[attacker][1]+attackingPlayer.supergrid_location[0]
+							, attackingPlayer.party_positions[attacker][0]+attackingPlayer.supergrid_location[1])
+						if element_facing == ggparty.UP:
 							match_horz = tarloc[1] == atkloc[1]
 							match_vert = tarloc[0] <= atkloc[0]
 						elif element_facing == ggparty.DOWN:
@@ -98,36 +94,26 @@ class Move():
 							match_horz = tarloc[1] <= atkloc[1]
 							match_vert = tarloc[0] == atkloc[0]
 						if match_horz & match_vert:
-							targetPlayer.health -= self.damage
+							targets[1].health -= self.damage
 							if screen != 0:
 								self.drawAttack(atkloc, tarloc, screen)
 						
-			elif attackingPlayer.party_members[attacker].chartype == 1:
-				for targetPlayer in allPlayers:
-					target_locs_local = targetPlayer.getOccupiedCells()
-					for target in target_locs_local:
-						match_horz = False
-						match_vert = False
-						atkloc_local = attackingPlayer.party_positions[attacker]
-						atkloc_local = (atkloc_local[1],atkloc_local[0])
-						atkloc = [sum(x) for x in zip(attackingPlayer.supergrid_location, atkloc_local)]
-						tarloc = [sum(x) for x in zip(targetPlayer.supergrid_location, target)]
+			elif attackingPlayer.party_members[attacker].chartype == ggparty.DOUBLE_SHOT:
+				for targets in allOccupied:
+					for tarloc in targets[0]:
+						match = False
 						element_facing = attackingPlayer.party_members[attacker].rotation
-						if attackingPlayer == targetPlayer: # Don't shoot yourself
-							pass
-						elif element_facing == ggparty.UP:
-							match_horz = tarloc[1] == atkloc[1]
-							match_vert = True
+						atkloc = (attackingPlayer.party_positions[attacker][1]+attackingPlayer.supergrid_location[0]
+							, attackingPlayer.party_positions[attacker][0]+attackingPlayer.supergrid_location[1])
+						if element_facing == ggparty.UP:
+							match = tarloc[1] == atkloc[1]
 						elif element_facing == ggparty.DOWN:
-							match_horz = tarloc[1] == atkloc[1]
-							match_vert = True
+							match = tarloc[1] == atkloc[1]
 						elif element_facing == ggparty.RIGHT:
-							match_horz = True
-							match_vert = tarloc[0] == atkloc[0]
+							match = tarloc[0] == atkloc[0]
 						elif element_facing == ggparty.LEFT:
-							match_horz = True
-							match_vert = tarloc[0] == atkloc[0]
-						if match_horz & match_vert:
-							targetPlayer.health -= self.damage
+							match = tarloc[0] == atkloc[0]
+						if match:
+							targets[1].health -= self.damage
 							if screen != 0:
 								self.drawAttack(atkloc, tarloc, screen)

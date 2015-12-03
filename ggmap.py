@@ -40,8 +40,8 @@ class MapGrid():
 	BOARD_SIZE = 500;
 	CONSOLE_SIZE = 100;
 	GRID_SIZE = 10
-	WIDTH = BOARD_SIZE*4/(5*GRID_SIZE+1)
-	HEIGHT = BOARD_SIZE*4/(5*GRID_SIZE+1)
+	WIDTH = (int)(BOARD_SIZE*4/(5*GRID_SIZE+1))
+	HEIGHT = (int)(BOARD_SIZE*4/(5*GRID_SIZE+1))
  
 # This sets the margin between each cell
 	MARGIN = BOARD_SIZE/(5*GRID_SIZE+1)
@@ -57,8 +57,8 @@ class MapGrid():
 		self.exe = 0
 		
 		# Initialize text variables
-		self.myfont = pygame.font.SysFont("arial bold",BOARD_SIZE/15)
-		self.healthfont = pygame.font.SysFont("arial bold",BOARD_SIZE/30)
+		self.myfont = pygame.font.SysFont("arial bold",(int)(BOARD_SIZE/15))
+		self.healthfont = pygame.font.SysFont("arial bold",(int)(BOARD_SIZE/30))
 		
 		for row in range(GRID_SIZE):
 	# Add an empty array that will hold each cell

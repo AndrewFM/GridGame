@@ -63,7 +63,7 @@ class CharacterSprite(pygame.sprite.Sprite):
 		else: # now, horizontal
 			shapeWidth = cellWidth*2 + margin
 			shapeHeight = cellHeight			
-		self.image = pygame.transform.scale(self.image, (shapeWidth, shapeHeight))
+		self.image = pygame.transform.scale(self.image, (int(shapeWidth), int(shapeHeight)))
 
 	#Increment the current rotation by some amount
 	def rotateRelative(self, angle):
@@ -110,17 +110,25 @@ class PartyGrid():
 		else:
 			return 1
 
-	# Returns the coordinates of all occupied cells
+	# Returns the local coordinates of all occupied cells
 	def getOccupiedCells(self):
 		coordList = []
 		for i in range(self.numberOfCharacters()):
 			member = self.party_members[i]
 			pos = self.party_positions[i]
 			for coord in self.__determineOccupyingCells(member.chartype, member.rotation, pos[0], pos[1]):
-				coord = (coord[1],coord[0])
-				coordList.append(coord)
+				coordList.append((coord[1],coord[0]))
 		return coordList
 
+	# Returns the global coordinates of all occupied cells
+	def getSupergridCells(self):
+		coordList = []
+		for i in range(self.numberOfCharacters()):
+			member = self.party_members[i]
+			pos = self.party_positions[i]
+			for coord in self.__determineOccupyingCells(member.chartype, member.rotation, pos[0], pos[1]):
+				coordList.append((coord[1]+self.supergrid_location[0],coord[0]+self.supergrid_location[1]))
+		return coordList		
 		
 	# Returns 1 if the character was successfully inserted, 0 otherwise.
 	# Angles should be in degrees, should be between 0 and 2pi, and should always be multiples of pi/2.
