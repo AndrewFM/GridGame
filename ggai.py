@@ -78,7 +78,7 @@ class AIOpponent():
 
 				ggmove.setAbsolute(currentParty, [originLocations[curIndex][0]+self.action_table[moveIndex][actIndex][0]
 												, originLocations[curIndex][1]+self.action_table[moveIndex][actIndex][1]]
-												, self.action_table[moveIndex][actIndex][2])
+												, self.action_table[moveIndex][actIndex][2], 0)
 				payoff = 0			
 				print(self.sequence_table[moveIndex][actIndex])
 				
@@ -87,7 +87,7 @@ class AIOpponent():
 						for oppActIndex in range(len(self.action_table[moveIndex])):
 								ggmove.setAbsolute(allParties[oppIndex], [originLocations[oppIndex][0]+self.action_table[moveIndex][oppActIndex][0]
 												, originLocations[oppIndex][1]+self.action_table[moveIndex][oppActIndex][1]]
-												, self.action_table[moveIndex][oppActIndex][2])
+												, self.action_table[moveIndex][oppActIndex][2], 0)
 								ggmove.Move().attack(currentParty,allParties[oppIndex],[],0)
 								ggmove.Move().attack(allParties[oppIndex],currentParty,[],0)
 								damageTaken = originHealth[curIndex] - currentParty.health
@@ -102,7 +102,7 @@ class AIOpponent():
 
 		# Reset parties to original locations and directions
 		for i in range(len(allParties)):
-			ggmove.setAbsolute(allParties[i], originLocations[i], originDirections[i])
+			ggmove.setAbsolute(allParties[i], originLocations[i], originDirections[i], 1)
 
 		dir_seq = bestAction
 		return dir_seq

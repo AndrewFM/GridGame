@@ -139,6 +139,7 @@ class PartyGrid():
 		self.party_members.append(CharacterSprite((0,0), angle, chartype, 0))
 		self.party_positions.append((gridx, gridy))
 		self.__updateGrid()
+		self.__calculateRotationMaps()
 		return 1
 
 	# Creates a "ghost" image of a character at this location, for previewing purposes.
@@ -197,6 +198,7 @@ class PartyGrid():
 		self.party_members = updatedCharList
 		self.party_positions = updatedPosList
 		self.__updateGrid()		
+		self.__calculateRotationMaps()
 
 	# Returns the number of characters currently placed into this grid.
 	def numberOfCharacters(self):
@@ -239,12 +241,12 @@ class PartyGrid():
 		return 0
 
 	# Rotates the entire party clockwise by 90 degrees
-	def rotatePartyCounterClockwise(self):
+	def __rotatePartyCounterClockwise(self):
 		for _ in range(3):
-			self.rotatePartyClockwise()
+			self.__rotatePartyClockwise()
 
 	# Rotates the entire party clockwise by 90 degrees
-	def rotatePartyClockwise(self):
+	def __rotatePartyClockwise(self):
 		updatedPosList = []
 		self.grid_angle = (self.grid_angle-90) % 360
 		for i in range(len(self.party_members)):
@@ -273,6 +275,54 @@ class PartyGrid():
 
 		self.party_positions = updatedPosList
 		self.__updateGrid()
+
+	#Store a copy of the party configuration in each of the four party orientations
+	def __calculateRotationMaps(self):
+		ind = 0
+		self.rot_party_positions = []
+		self.rot_party_directions = []
+		self.rot_grid_contents = []
+		for i in range(4):
+			self.rot_party_positions.append([])
+			self.rot_party_directions.append([])
+			self.rot_grid_contents.append([])
+		for i in range(4):
+			self.__rotatePartyClockwise()
+			if self.grid_angle == RIGHT:
+				ind = 0
+			elif self.grid_angle == UP:
+				ind = 1
+			elif self.grid_angle == LEFT:
+				ind = 2
+			else:
+				ind = 3
+			self.rot_party_positions[ind] = copy.deepcopy(self.party_positions)
+			self.rot_grid_contents[ind] = copy.deepcopy(self.grid_contents)
+			for char in self.party_members:
+				self.rot_party_directions[ind].append(char.rotation) 
+
+	# Rotate the entire party to the given direction
+	# If visual = 0, skip updating the position where the party members will be drawn
+	def setPartyRotation(self, direction, visual):
+		ind = 0
+		if direction == RIGHT:
+			ind = 0
+		elif direction == UP:
+			ind = 1
+		elif direction == LEFT:
+			ind = 2
+		else:
+			ind = 3		
+		self.party_positions = copy.deepcopy(self.rot_party_positions[ind])
+		self.grid_contents = copy.deepcopy(self.rot_grid_contents[ind])
+		if visual != 0:
+			for i in range(len(self.party_members)):
+				self.party_members[i].rotate(self.rot_party_directions[ind][i])
+				self.party_members[i].rect.topleft = (self.grid_position[0]+self.party_positions[i][0]*CELL_SIZE,self.grid_position[1]+self.party_positions[i][1]*CELL_SIZE)
+		else:
+			for i in range(len(self.party_members)):
+				self.party_members[i].rotation = self.rot_party_directions[ind][i]
+
 
 	# Set the position on the screen where the grid should be drawn at
 	def gridPosition(self, x, y):
@@ -357,4 +407,5 @@ class PartyGrid():
 				self.health += 20
 			elif element.chartype == 2:
 				self.health += 80
+
 	

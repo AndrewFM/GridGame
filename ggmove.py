@@ -4,20 +4,13 @@ import ggparty
 import ggmap
 import pygame
 
-def setRotation(player, direction):
-	diff = player.grid_angle - direction
-	diff = diff % 360 # correct negative angles
-	while diff > 0:
-		player.rotatePartyClockwise()
-		diff -= 90	
-	player.resizeGrid(ggmap.WIDTH, ggmap.HEIGHT, ggmap.MARGIN)
-
 # Set the party to be at a specific location on the supergrid, facing a specific angle
-def setAbsolute(player, location, direction):
-	setRotation(player, direction)
+def setAbsolute(player, location, direction, visual):
+	player.setPartyRotation(direction, visual)
 	player.supergrid_location[0] = min(max(location[0],0), ggmap.GRID_SIZE-3)
 	player.supergrid_location[1] = min(max(location[1],0), ggmap.GRID_SIZE-3)
-
+	if visual != 0:
+		player.resizeGrid(ggmap.WIDTH, ggmap.HEIGHT, ggmap.MARGIN)
 
 class Move():
 	def __init__(self):
@@ -33,16 +26,17 @@ class Move():
 			return
 		if cmd == ggparty.UP: # Execute the appropriate command
 			player.supergrid_location[0] = max(player.supergrid_location[0]-1,0)
-			setRotation(player, ggparty.UP)
+			player.setPartyRotation(ggparty.UP, 1)
 		elif cmd == ggparty.DOWN:
 			player.supergrid_location[0] = min(player.supergrid_location[0]+1,ggmap.GRID_SIZE-3)
-			setRotation(player, ggparty.DOWN)			
+			player.setPartyRotation(ggparty.DOWN, 1)			
 		elif cmd == ggparty.RIGHT:
 			player.supergrid_location[1] = min(player.supergrid_location[1]+1,ggmap.GRID_SIZE-3)
-			setRotation(player, ggparty.RIGHT)
+			player.setPartyRotation(ggparty.RIGHT, 1)
 		elif cmd == ggparty.LEFT:
 			player.supergrid_location[1] = max(player.supergrid_location[1]-1,0)
-			setRotation(player, ggparty.LEFT)
+			player.setPartyRotation(ggparty.LEFT, 1)
+		player.resizeGrid(ggmap.WIDTH, ggmap.HEIGHT, ggmap.MARGIN)
 	
 	def drawAttack(self, atkloc, tarloc, screen):
 		color = ggmap.RED
