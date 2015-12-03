@@ -22,10 +22,7 @@ class Move():
 		diff = diff % 360 # correct negative angles
 		while diff > 0:
 			player.rotatePartyClockwise()
-			diff -= 90
-		player.resizeGrid(ggmap.WIDTH, ggmap.HEIGHT, ggmap.MARGIN)
-	
-	
+			diff -= 90	
 	
 	def oneStep(self, player, cmd):
 		# Takes the player locations and the commands from each player
@@ -33,22 +30,17 @@ class Move():
 		if player.alive == 0: # if the player is dead, don't accept move commands
 			return
 		if cmd == "UP": # Execute the appropriate command
-			player.supergrid_location[0] -= 1 # Modify location for that player
+			player.supergrid_location[0] = max(player.supergrid_location[0]-1,0)
 			self.setRotation(player, ggparty.UP)
 		elif cmd == "DOWN":
-			player.supergrid_location[0] += 1
-			self.setRotation(player, ggparty.DOWN)
+			player.supergrid_location[0] = min(player.supergrid_location[0]+1,ggmap.GRID_SIZE-3)
+			self.setRotation(player, ggparty.DOWN)			
 		elif cmd == "RIGHT":
-			player.supergrid_location[1] += 1
+			player.supergrid_location[1] = min(player.supergrid_location[1]+1,ggmap.GRID_SIZE-3)
 			self.setRotation(player, ggparty.RIGHT)
 		elif cmd == "LEFT":
-			player.supergrid_location[1] -= 1
+			player.supergrid_location[1] = max(player.supergrid_location[1]-1,0)
 			self.setRotation(player, ggparty.LEFT)
-		# Make sure player is still on the map
-		player.supergrid_location[1] = max(player.supergrid_location[1],0) # Bottom boundary
-		player.supergrid_location[1] = min(player.supergrid_location[1],ggmap.GRID_SIZE-3) # Top boundary
-		player.supergrid_location[0] = max(player.supergrid_location[0],0) # Left boundary
-		player.supergrid_location[0] = min(player.supergrid_location[0],ggmap.GRID_SIZE-3) # Right boundary
 	
 	def drawAttack(self, atkloc, tarloc, screen):
 		color = ggmap.RED
