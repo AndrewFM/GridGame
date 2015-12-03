@@ -4,43 +4,45 @@ import ggparty
 import ggmap
 import pygame
 
+def setRotation(player, direction):
+	diff = player.grid_angle - direction
+	diff = diff % 360 # correct negative angles
+	while diff > 0:
+		player.rotatePartyClockwise()
+		diff -= 90	
+	player.resizeGrid(ggmap.WIDTH, ggmap.HEIGHT, ggmap.MARGIN)
+
+# Set the party to be at a specific location on the supergrid, facing a specific angle
+def setAbsolute(player, location, direction):
+	setRotation(player, direction)
+	player.supergrid_location[0] = min(max(location[0],0), ggmap.GRID_SIZE-3)
+	player.supergrid_location[1] = min(max(location[1],0), ggmap.GRID_SIZE-3)
+
+
 class Move():
 	def __init__(self):
-		# ...
 		self.damage = 5
 		# Initialize graphics
 		self.explosion = pygame.image.load('explosion.jpg')
-		self.explosion = pygame.transform.scale(self.explosion, (ggmap.WIDTH, ggmap.HEIGHT))
-
-# RIGHT = 0
-# UP = 90
-# LEFT = 180
-# DOWN = 270		
-
-	def setRotation(self, player, direction):
-		diff = player.grid_angle - direction
-		diff = diff % 360 # correct negative angles
-		while diff > 0:
-			player.rotatePartyClockwise()
-			diff -= 90	
+		self.explosion = pygame.transform.scale(self.explosion, (ggmap.WIDTH, ggmap.HEIGHT))	
 	
 	def oneStep(self, player, cmd):
 		# Takes the player locations and the commands from each player
 		# Computes the player locations after each command and outputs new player locations
 		if player.alive == 0: # if the player is dead, don't accept move commands
 			return
-		if cmd == "UP": # Execute the appropriate command
+		if cmd == ggparty.UP: # Execute the appropriate command
 			player.supergrid_location[0] = max(player.supergrid_location[0]-1,0)
-			self.setRotation(player, ggparty.UP)
-		elif cmd == "DOWN":
+			setRotation(player, ggparty.UP)
+		elif cmd == ggparty.DOWN:
 			player.supergrid_location[0] = min(player.supergrid_location[0]+1,ggmap.GRID_SIZE-3)
-			self.setRotation(player, ggparty.DOWN)			
-		elif cmd == "RIGHT":
+			setRotation(player, ggparty.DOWN)			
+		elif cmd == ggparty.RIGHT:
 			player.supergrid_location[1] = min(player.supergrid_location[1]+1,ggmap.GRID_SIZE-3)
-			self.setRotation(player, ggparty.RIGHT)
-		elif cmd == "LEFT":
+			setRotation(player, ggparty.RIGHT)
+		elif cmd == ggparty.LEFT:
 			player.supergrid_location[1] = max(player.supergrid_location[1]-1,0)
-			self.setRotation(player, ggparty.LEFT)
+			setRotation(player, ggparty.LEFT)
 	
 	def drawAttack(self, atkloc, tarloc, screen):
 		color = ggmap.RED

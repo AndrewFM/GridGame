@@ -1,7 +1,6 @@
 # Data structure for the playing grid that the game takes place on.
 import pygame
 import ggparty
-import ggai
 import ggmove
 from copy import deepcopy
 
@@ -87,7 +86,6 @@ class MapGrid():
 		currentalert = []
 
 	# Initialize command variables
-		self.AI = ggai.AIOpponent()
 		self.mstep = ggmove.Move()
 		
 # Set row 1, cell 5 to one. (Remember rows and
@@ -102,28 +100,28 @@ class MapGrid():
 		elif event.type == pygame.KEYDOWN: # If user presses a key
 			if event.key == pygame.K_BACKSPACE and huPlayer.cmd_id > 0: # If key is backspace, and any commands have been enterred
 				huPlayer.cmd_id -= 1 # Decrement command ID
-				huPlayer.cmd_seq[huPlayer.cmd_id] = "[empty]" # Remove last entered command
+				huPlayer.cmd_seq[huPlayer.cmd_id] = -1 # Remove last entered command
 			elif event.key == pygame.K_RETURN: # If key is return
 				self.atklocs_seq = []
 				currentalert = [] # Clear current alert
 				self.exe = 1 # We're now in the execution phase
 				for currentAI in aiPlayers:
-					currentAI.cmd_seq = self.AI.decideMoves(currentAI, aiPlayers + [huPlayer]) # get AI commands for each step
+					currentAI.cmd_seq = currentAI.ai_control.decideMoves(currentAI, aiPlayers + [huPlayer]) # get AI commands for each step
 			elif huPlayer.cmd_id < 3:
 				if event.key == pygame.K_UP: # Directional arrow keys
-					huPlayer.cmd_seq[huPlayer.cmd_id] = "UP" # Add corresponding command to the sequence
+					huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.UP # Add corresponding command to the sequence
 					huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
 					#player.loc[0][1] -= 1
 				elif event.key == pygame.K_DOWN:
-					huPlayer.cmd_seq[huPlayer.cmd_id] = "DOWN" # Add corresponding command to the sequence
+					huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.DOWN # Add corresponding command to the sequence
 					huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
 					#player.loc[0][1] += 1
 				elif event.key == pygame.K_RIGHT:
-					huPlayer.cmd_seq[huPlayer.cmd_id] = "RIGHT" # Add corresponding command to the sequence
+					huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.RIGHT # Add corresponding command to the sequence
 					huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
 					#player.loc[0][0] += 1
 				elif event.key == pygame.K_LEFT:
-					huPlayer.cmd_seq[huPlayer.cmd_id] = "LEFT" # Add corresponding command to the sequence
+					huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.LEFT # Add corresponding command to the sequence
 					huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
 					#player.loc[0][0] -= 1
 		
@@ -164,16 +162,6 @@ class MapGrid():
 		screen.blit(label,((MARGIN + WIDTH) * column + MARGIN,
 							(MARGIN + HEIGHT) * row + MARGIN))
 
-	#Rotate the party located at (gridx, gridy). The angle should be ggparty.UP, ggparty.DOWN, ggparty.LEFT, or ggparty.RIGHT.
-	def rotateParty(self, gridx, gridy, angle):
-		party = getParty(gridx, gridy)
-		if party != -1:
-			for _ in range(4):
-				if party.grid_angle == angle:
-					break
-				else:
-					party.rotatePartyClockwise()
-
 	# Renders the map on screen
 	def renderGrid(self, screen):
 		# Set the screen background
@@ -203,7 +191,16 @@ class MapGrid():
 		# Write the command sequence in the input console
 		offset = 0
 		for command in huPlayer.cmd_seq:
-			label = self.myfont.render(command,1,BLACK)
+			txt = "[empty]"
+			if command == ggparty.UP:
+				txt = "UP"
+			elif command == ggparty.DOWN:
+				txt = "DOWN"
+			elif command == ggparty.LEFT:
+				txt = "LEFT"
+			elif command == ggparty.RIGHT:
+				txt = "RIGHT"
+			label = self.myfont.render(txt,1,BLACK)
 			screen.blit(label, (MARGIN, BOARD_SIZE+offset))
 			offset += BOARD_SIZE/20
 		# Write current alert into input console

@@ -4,18 +4,49 @@ import ggparty
 import numpy as np
 import copy
 import ggmove
+import time
 
 
 # AI logic for the opponent(s)
 class AIOpponent():
 	
 	def __init__(self):
-		# 0: 'UP'; 1: 'RIGHT'; 2: 'DOWN'; 3: 'LEFT'
-		self.action_table = []
-		for move1 in range(4):
-			for move2 in range(4):
-				for move3 in range(4):
-					self.action_table.append([move1,move2,move3])
+		#Each entry in the action table is of the form [Number of moves-1][Row-Offset, Col-Offset, Facing Direction]
+		#Sequence table is a parallel array with the cooresponding actions that results in the above offset/direction.
+		self.action_table = [[],[],[]]
+		self.sequence_table = [[],[],[]]
+		for move1 in [ggparty.UP, ggparty.DOWN, ggparty.LEFT, ggparty.RIGHT]:
+			trans = [0,0]
+			trans = self.calcTranslate(trans, move1)
+			self.action_table[0].append([trans[0],trans[1],move1])
+			self.sequence_table[0].append([move1])
+
+			for move2 in [ggparty.UP, ggparty.DOWN, ggparty.LEFT, ggparty.RIGHT]:
+				trans = [0,0]
+				trans = self.calcTranslate(trans, move1)
+				trans = self.calcTranslate(trans, move2)
+				self.action_table[1].append([trans[0],trans[1],move2])
+				self.sequence_table[1].append([move1, move2])
+
+				for move3 in [ggparty.UP, ggparty.DOWN, ggparty.LEFT, ggparty.RIGHT]:
+					trans = [0,0]
+					trans = self.calcTranslate(trans, move1)
+					trans = self.calcTranslate(trans, move2)
+					trans = self.calcTranslate(trans, move3)
+					self.action_table[2].append([trans[0],trans[1],move3])
+					self.sequence_table[2].append([move1, move2, move3])
+
+	#Trans = [Row-offset, Col-offset], returns modification based on movement direction
+	def calcTranslate(self, trans, direction):
+		if direction == ggparty.UP:
+			return [trans[0]+1, trans[1]]
+		if direction == ggparty.DOWN:
+			return [trans[0]-1, trans[1]]
+		if direction == ggparty.LEFT:
+			return [trans[0], trans[1]-1]
+		if direction == ggparty.RIGHT:
+			return [trans[0], trans[1]+1]
+
 				
 	# parties is a list of all ggparty.PartyGrid objects on the game board.
 	# currentParty is your party.
@@ -23,50 +54,57 @@ class AIOpponent():
 	# Basically, it uses brute force global search method
 	def decideMoves(self, currentParty, allParties):
 		# Return a sequence of three moves
-		# import random
-		# moves = 3;
 		
-		# These variables define the move output format. Change as necessary.
-		directions = ['UP','RIGHT','DOWN','LEFT']
-		
-		maxPayoff = -999
-		bestAction = [0,0,0]
-		for selfAction in self.action_table:  # select AI's potential action	
-			ghostSelf = copy.deepcopy(currentParty)
-			for element in range(2):
-				ghostSelf.party_members[element].src_image = currentParty.party_members[element].src_image
-				ghostSelf.party_members[element].image = currentParty.party_members[element].image
-			selfHP = ghostSelf.health
-			payoff = 0
-			
-			print selfAction
-			
-			for opponent in allParties:
-				if opponent!= currentParty:
-					ghostOpponent = copy.deepcopy(opponent)
-					for element in range(2):
-						ghostOpponent.party_members[element].src_image = opponent.party_members[element].src_image
-						ghostOpponent.party_members[element].image = opponent.party_members[element].image
-					oppHP = ghostSelf.health
-					for oppAction in self.action_table:
-						for step in range(3):
-							ggmove.Move().oneStep(ghostSelf,directions[selfAction[step]])
-							ggmove.Move().oneStep(ghostOpponent,directions[oppAction[step]])
-							ggmove.Move().attack(ghostSelf,ghostOpponent,[],0)
-							ggmove.Move().attack(ghostOpponent,ghostSelf,[],0)
-							damageTaken = selfHP - ghostSelf.health
-							damageDealt = oppHP - ghostOpponent.health
-							payoff += damageDealt - damageTaken
-							ghostSelf.health = selfHP # reset health totals after each test
-							ghostOpponent.health = oppHP
-							
-			
-			if payoff > maxPayoff:
-				maxPayoff = payoff
-				bestAction = selfAction
+		# Remember original locations and directions so they can be reset at end of simulation
+		originLocations = []
+		originDirections = []
+		originHealth = []
+		for i in range(len(allParties)):
+			if allParties[i] == currentParty:
+				curIndex = i
+			originLocations.append([allParties[i].supergrid_location[0], allParties[i].supergrid_location[1]])
+			originDirections.append(allParties[i].grid_angle)
+			originHealth.append(allParties[i].health)
 
-		# dir = random.randrange(0,4)
-		dir_seq = [ directions[ selfAction[0] ], directions[ selfAction[1] ], directions[ selfAction[2] ] ]
+		bestAction = [0,0,0]
+		for moveIndex in range(3):
+			maxPayoff = -999
+			for actIndex in range(len(self.action_table[moveIndex])):  # select AI's potential action
+				# If we've already locked in an action, ignore all sequences that disagree with our intentions
+				if moveIndex > 0 and self.sequence_table[moveIndex][actIndex][0] != bestAction[0]:
+					continue
+				if moveIndex > 1 and self.sequence_table[moveIndex][actIndex][1] != bestAction[1]:
+					continue
+
+				ggmove.setAbsolute(currentParty, [originLocations[curIndex][0]+self.action_table[moveIndex][actIndex][0]
+												, originLocations[curIndex][1]+self.action_table[moveIndex][actIndex][1]]
+												, self.action_table[moveIndex][actIndex][2])
+				payoff = 0			
+				print(self.sequence_table[moveIndex][actIndex])
+				
+				for oppIndex in range(len(allParties)):
+					if allParties[oppIndex] != currentParty:
+						for oppActIndex in range(len(self.action_table[moveIndex])):
+								ggmove.setAbsolute(allParties[oppIndex], [originLocations[oppIndex][0]+self.action_table[moveIndex][oppActIndex][0]
+												, originLocations[oppIndex][1]+self.action_table[moveIndex][oppActIndex][1]]
+												, self.action_table[moveIndex][oppActIndex][2])
+								ggmove.Move().attack(currentParty,allParties[oppIndex],[],0)
+								ggmove.Move().attack(allParties[oppIndex],currentParty,[],0)
+								damageTaken = originHealth[curIndex] - currentParty.health
+								damageDealt = originHealth[oppIndex] - allParties[oppIndex].health
+								payoff += damageDealt - damageTaken
+								currentParty.health = originHealth[curIndex] # reset health totals after each test
+								allParties[oppIndex].health = originHealth[oppIndex]						
+				
+				if payoff > maxPayoff:
+					maxPayoff = payoff
+					bestAction[moveIndex] = self.sequence_table[moveIndex][actIndex][moveIndex]
+
+		# Reset parties to original locations and directions
+		for i in range(len(allParties)):
+			ggmove.setAbsolute(allParties[i], originLocations[i], originDirections[i])
+
+		dir_seq = bestAction
 		return dir_seq
 			
 #			OccupyZone_self = []
