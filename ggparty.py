@@ -313,6 +313,7 @@ class PartyGrid():
 			ind = 2
 		else:
 			ind = 3		
+		self.grid_angle = direction
 		self.party_positions = copy.deepcopy(self.rot_party_positions[ind])
 		self.grid_contents = copy.deepcopy(self.rot_grid_contents[ind])
 		if visual != 0:
