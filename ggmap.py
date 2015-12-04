@@ -9,15 +9,7 @@ from copy import deepcopy
 MOUSE_LEFT = 1
 MOUSE_RIGHT = 3
 
-class MapGrid():
-
-	#TODO: We need a data structure for holding all the parties that are on the map grid.
-	#	   This includes a way to tell which party is controlled by the player, which is controlled by the AI, etc.
-	#		We also need a data structure to track the movement sequence the player is currently inputting.
-	#		We need a way to track the health of each of the players.
-	#		We need a way to distinguish between the simulation phase and the input phase.
-	#			(More specifically: Player input phase, AI input phase, Simulation phase)
-	
+class MapGrid():	
 	global BLACK
 	global WHITE
 	global GREEN
@@ -135,9 +127,10 @@ class MapGrid():
 		
 		# For AI players
 		for currentAI in aiPlayers:
-			self.mstep.oneStep(currentAI,currentAI.cmd_seq[step])
-			self.drawParty(screen, currentAI)
-			self.mstep.attack(currentAI, huPlayer, aiPlayers, screen)
+			if currentAI.health > 0:
+				self.mstep.oneStep(currentAI,currentAI.cmd_seq[step])
+				self.drawParty(screen, currentAI)
+				self.mstep.attack(currentAI, huPlayer, aiPlayers, screen)
 		self.mstep.attack(huPlayer, huPlayer, aiPlayers, screen)
 		
 		pygame.display.flip()	

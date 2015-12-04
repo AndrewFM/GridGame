@@ -4,7 +4,6 @@ import ggparty
 import numpy as np
 import copy
 import ggmove
-import time
 
 
 # AI logic for the opponent(s)
@@ -13,6 +12,7 @@ class AIOpponent():
 	def __init__(self):
 		#Each entry in the action table is of the form [Number of moves-1][Row-Offset, Col-Offset, Facing Direction]
 		#Sequence table is a parallel array with the cooresponding actions that results in the above offset/direction.
+		self.move_obj = ggmove.Move()
 		self.action_table = [[],[],[]]
 		self.sequence_table = [[],[],[]]
 		for move1 in [ggparty.UP, ggparty.DOWN, ggparty.LEFT, ggparty.RIGHT]:
@@ -54,7 +54,6 @@ class AIOpponent():
 	# Basically, it uses brute force global search method
 	def decideMoves(self, currentParty, allParties):
 		# Return a sequence of three moves
-		
 		# Remember original locations and directions so they can be reset at end of simulation
 		originLocations = []
 		originDirections = []
@@ -80,16 +79,16 @@ class AIOpponent():
 												, originLocations[curIndex][1]+self.action_table[moveIndex][actIndex][1]]
 												, self.action_table[moveIndex][actIndex][2], 0)
 				payoff = 0			
-				print(self.sequence_table[moveIndex][actIndex])
 				
 				for oppIndex in range(len(allParties)):
-					if allParties[oppIndex] != currentParty:
+					#Don't target self, and don't target parties that are already dead
+					if allParties[oppIndex] != currentParty and allParties[oppIndex].health > 0:
 						for oppActIndex in range(len(self.action_table[moveIndex])):
 								ggmove.setAbsolute(allParties[oppIndex], [originLocations[oppIndex][0]+self.action_table[moveIndex][oppActIndex][0]
 												, originLocations[oppIndex][1]+self.action_table[moveIndex][oppActIndex][1]]
 												, self.action_table[moveIndex][oppActIndex][2], 0)
-								ggmove.Move().attack(currentParty,allParties[oppIndex],[],0)
-								ggmove.Move().attack(allParties[oppIndex],currentParty,[],0)
+								self.move_obj.attack(currentParty,allParties[oppIndex],[],0)
+								self.move_obj.attack(allParties[oppIndex],currentParty,[],0)
 								damageTaken = originHealth[curIndex] - currentParty.health
 								damageDealt = originHealth[oppIndex] - allParties[oppIndex].health
 								payoff += damageDealt - damageTaken

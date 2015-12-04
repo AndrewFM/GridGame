@@ -56,9 +56,8 @@ class Move():
 		# If there are valid attacks, resolve them
 		
 		# if screen == 0, don't draw anything
-		
 		allPlayers = aiPlayers + [huPlayer]
-		allOccupied = [(player.getSupergridCells(), player) for player in allPlayers if player != attackingPlayer]
+		allOccupied = [(player.getSupergridCells(), player) for player in allPlayers if player != attackingPlayer and player.health > 0]
 
 		for attacker in range(2):
 			if attackingPlayer.party_members[attacker].chartype == ggparty.SINGLE_SHOT:
