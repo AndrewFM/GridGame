@@ -87,6 +87,8 @@ class PartyGrid():
 		self.cmd_seq = ["[empty]","[empty]","[empty]"]
 		self.cmd_id = 0
 		self.alive = 1
+		self.atkweight = 1
+		self.defweight = 1
 		# Hardcoding the global rotation translations for the 1x2 character for now
 		# ... because I'm not totally sure how to do it programatically
 		self.double_posmapUD = [ #Up/Down to Left/Right
