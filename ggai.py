@@ -5,6 +5,30 @@ import numpy as np
 import copy
 import ggmove
 
+#Each of the metric functions return an array containing the following respective elements:
+#	[Party to target, that party's value of metric, min value of metric, max value of metric]
+#   The latter three values are for any normalization of the metrics that may need to be done.
+
+#Gives the closest party in terms of number of moves until you are in attacking range
+def metric_distance(opponentParties):
+	return 0
+
+#Gives the party with the least health
+def metric_health(opponentParties):
+	return 0
+
+#Gives the party with the most firepower
+def metric_threat(opponentParties):
+	return 0
+
+#Gives the party with the most vulnerable surface area
+def metric_ease(opponentParties):
+	return 0
+
+#Gives the party that is least trusted
+#Party trust should be a parallel array of the current 
+def metric_trust(opponentParties, partyTrust):
+	return 0
 
 class AIOpponent_nondeterministic():
 	
