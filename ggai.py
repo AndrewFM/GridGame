@@ -161,6 +161,8 @@ class AIOpponent_nondeterministic():
 			originDirections.append(allParties[i].grid_angle)
 			originHealth.append(allParties[i].health)
 
+		targetPriority = [1]*len(allParties)
+		
 		bestAction = [0,0,0]
 		for moveIndex in range(3):
 			maxPayoffs = [-999, -999] # [0] is best action, [1] is second best
@@ -188,7 +190,7 @@ class AIOpponent_nondeterministic():
 								self.move_obj.attack(allParties[oppIndex],currentParty,[],0)
 								damageTaken = originHealth[curIndex] - currentParty.health
 								damageDealt = originHealth[oppIndex] - allParties[oppIndex].health
-								payoff += currentParty.atkweight*damageDealt - currentParty.defweight*damageTaken
+								payoff += currentParty.atkweight*targetPriority[oppIndex]*damageDealt - currentParty.defweight*damageTaken
 								currentParty.health = originHealth[curIndex] # reset health totals after each test
 								allParties[oppIndex].health = originHealth[oppIndex]						
 				
