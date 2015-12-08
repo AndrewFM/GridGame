@@ -58,6 +58,7 @@ class Move():
 		# if screen == 0, don't draw anything
 		allPlayers = aiPlayers + [huPlayer]
 		allOccupied = [(player.getSupergridCells(), player) for player in allPlayers if player != attackingPlayer and player.health > 0]
+		indicesAttacked = []
 
 		for attacker in range(2):
 			if attackingPlayer.party_members[attacker].chartype == ggparty.SINGLE_SHOT:
@@ -84,7 +85,11 @@ class Move():
 							targets[1].health -= self.damage
 							if screen != 0:
 								self.drawAttack(atkloc, tarloc, screen)
-						
+								for i in range(len(allPlayers)):
+									if targets[1] == allPlayers[i]:
+										indicesAttacked.append(i)
+										break
+								
 			elif attackingPlayer.party_members[attacker].chartype == ggparty.DOUBLE_SHOT:
 				for targets in allOccupied:
 					for tarloc in targets[0]:
@@ -104,3 +109,21 @@ class Move():
 							targets[1].health -= self.damage
 							if screen != 0:
 								self.drawAttack(atkloc, tarloc, screen)
+								for i in range(len(allPlayers)):
+									if targets[1] == allPlayers[i]:
+										indicesAttacked.append(i)
+										break
+								
+		if screen != 0:
+			indicesAttacked = set(indicesAttacked)
+			for i in range(len(allPlayers)):
+				if allPlayers[i] == attackingPlayer:
+					attackingIndex = i
+					break
+			for index in indicesAttacked:
+				allPlayers[index].last_attacker = attackingPlayer
+				for i in range(len(allPlayers)):
+					if allPlayers[i] == allPlayers[index]:
+						allPlayers[i].decreaseTrust(attackingIndex)
+					elif allPlayers[i] != attackingPlayer:
+						allPlayers[i].increaseTrust(attackingIndex)

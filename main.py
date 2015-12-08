@@ -67,7 +67,7 @@ while running:
 			aiPlayers = []
 			for i in range(NUM_AI_PLAYERS):
 				aiPlayers.append(ggai.constructParty())
-				aiPlayers[i].assignAI(ggai.AIOpponent())
+				aiPlayers[i].assignAI(ggai.AIOpponent(ggai.metric_distance, ggai.metric_threat))
 			# huParty.party_members[x].chartype gives element type
 			# '' .rotation gives element angle
 			# huParty.party_position[x]

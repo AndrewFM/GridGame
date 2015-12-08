@@ -84,11 +84,15 @@ class PartyGrid():
 		self.grid_color = BLACK
 		self.health = []
 		self.facing_indicator = 1
-		self.cmd_seq = ["[empty]","[empty]","[empty]"]
+		self.cmd_seq = [-1,-1,-1]
 		self.cmd_id = 0
 		self.alive = 1
-		self.atkweight = 1
-		self.defweight = 1
+
+		self.atkweight = 1     #How much do I favor offense over defense? Used by AI.
+		self.defweight = 1     #How much do I favor defense over offense? Used by AI.
+		self.last_attacker = -1 #Last party that attacked this party. Used by AI.
+		self.trust = [0,0,0,0] #Trust values of the other parties on the grid. Used by AI.
+
 		# Hardcoding the global rotation translations for the 1x2 character for now
 		# ... because I'm not totally sure how to do it programatically
 		self.double_posmapUD = [ #Up/Down to Left/Right
@@ -111,6 +115,16 @@ class PartyGrid():
 			return 0
 		else:
 			return 1
+
+	def increaseTrust(self, index):
+		self.trust[index] += 1
+		if self.trust[index] > 5:
+			self.trust[index] = 5
+
+	def decreaseTrust(self, index):
+		self.trust[index] -= 1
+		if self.trust[index] < -5:
+			self.trust[index] = -5
 
 	# Returns the local coordinates of all occupied cells
 	def getOccupiedCells(self):
