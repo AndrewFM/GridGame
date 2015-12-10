@@ -87,6 +87,7 @@ class PartyGrid():
 		self.cmd_seq = [-1,-1,-1]
 		self.cmd_id = 0
 		self.alive = 1
+		self.healthRecord = []
 
 		self.atkweight = 1     #How much do I favor offense over defense? Used by AI.
 		self.defweight = 1     #How much do I favor defense over offense? Used by AI.
@@ -424,5 +425,6 @@ class PartyGrid():
 				self.health += 20
 			elif element.chartype == 2:
 				self.health += 120
+		self.healthRecord = [self.health]
 
 	

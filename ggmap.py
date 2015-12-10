@@ -121,6 +121,7 @@ class MapGrid():
 	
 	def executeStep(self, screen, huPlayer, aiPlayers, step):
 		atklocs = []
+		
 		# For human player
 		self.mstep.oneStep(huPlayer,huPlayer.cmd_seq[step])
 		self.drawParty(screen, huPlayer)
@@ -132,6 +133,11 @@ class MapGrid():
 				self.drawParty(screen, currentAI)
 				self.mstep.attack(currentAI, huPlayer, aiPlayers, screen)
 		self.mstep.attack(huPlayer, huPlayer, aiPlayers, screen)
+		
+		# Record current health totals and add them to the record for each player
+		huPlayer.healthRecord.append(huPlayer.health)
+		for currentAI in aiPlayers:
+			currentAI.healthRecord.append(currentAI.health)
 		
 		pygame.display.flip()	
 		pygame.time.wait(500) # Wait between showing each step. Time is in milliseconds.

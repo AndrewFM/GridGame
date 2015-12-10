@@ -6,6 +6,8 @@ import ggmap
 import ggparty
 import ggai
 import math
+import csv
+import datetime
 
 # Enums/Constants
 #  -- Scenes
@@ -130,5 +132,12 @@ while running:
 
 		pygame.display.flip()
 		pygame.time.wait(delay)
+
+recordName = 'GridGameOutput-' + datetime.datetime.now().strftime('%m-%d-%y-%H-%M-%S') + '.csv'
+with open(recordName,'wb') as csvfile:
+	output = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+	output.writerow(huPlayer.healthRecord)
+	for currentAI in aiPlayers:
+		output.writerow(currentAI.healthRecord)
 
 pygame.quit()
