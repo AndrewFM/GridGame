@@ -28,9 +28,9 @@ class MapGrid():
 	RED = (255, 0, 0)
  
 # This sets the WIDTH and HEIGHT of each grid location, as well as the size of the grid
-	BOARD_SIZE = 500;
-	CONSOLE_SIZE = 100;
-	GRID_SIZE = 10
+	BOARD_SIZE = 600
+	CONSOLE_SIZE = 120
+	GRID_SIZE = 15
 	WIDTH = (int)(BOARD_SIZE*4/(5*GRID_SIZE+1))
 	HEIGHT = (int)(BOARD_SIZE*4/(5*GRID_SIZE+1))
  

@@ -91,7 +91,7 @@ class PartyGrid():
 		self.atkweight = 1     #How much do I favor offense over defense? Used by AI.
 		self.defweight = 1     #How much do I favor defense over offense? Used by AI.
 		self.last_attacker = -1 #Last party that attacked this party. Used by AI.
-		self.trust = [0,0,0,0] #Trust values of the other parties on the grid. Used by AI.
+		self.trust = [] #Trust values of the other parties on the grid. Used by AI.
 
 		# Hardcoding the global rotation translations for the 1x2 character for now
 		# ... because I'm not totally sure how to do it programatically
