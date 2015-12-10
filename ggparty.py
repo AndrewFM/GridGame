@@ -423,6 +423,6 @@ class PartyGrid():
 			elif element.chartype == 1:
 				self.health += 20
 			elif element.chartype == 2:
-				self.health += 80
+				self.health += 120
 
 	
