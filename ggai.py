@@ -190,6 +190,17 @@ class AIOpponent_nondeterministic():
 								self.move_obj.attack(allParties[oppIndex],currentParty,[],0)
 								damageTaken = originHealth[curIndex] - currentParty.health
 								damageDealt = originHealth[oppIndex] - allParties[oppIndex].health
+								r=float(float(currentParty.health)/float(currentParty.healthRecord[0]))
+								#print r
+								if(r>0.8):
+									currentParty.atkweight=2
+									currentParty.defweight=1
+								elif(r>0.5 and r<0.8):
+									currentParty.atkweight=1
+									currentParty.defweight=1
+								else:
+									currentParty.atkweight=1
+									currentParty.defweight=2 
 								payoff += currentParty.atkweight*targetPriority[oppIndex]*damageDealt - currentParty.defweight*damageTaken
 								currentParty.health = originHealth[curIndex] # reset health totals after each test
 								allParties[oppIndex].health = originHealth[oppIndex]						
@@ -301,6 +312,19 @@ class AIOpponent():
 								self.move_obj.attack(allParties[oppIndex],currentParty,[],0)
 								damageTaken = originHealth[curIndex] - currentParty.health
 								damageDealt = originHealth[oppIndex] - allParties[oppIndex].health
+								r=float(float(currentParty.health)/float(currentParty.healthRecord[0]))
+								#print currentParty.health
+								#print currentParty.healthRecord[0]
+								print r
+								if(r>0.8):
+									currentParty.atkweight=2
+									currentParty.defweight=1
+								elif(r>0.5 and r<0.5):
+									currentParty.atkweight=1
+									currentParty.defweight=1
+								else:
+									currentParty.atkweight=1
+									currentParty.defweight=2 
 								payoff += currentParty.atkweight*targetPriority[oppIndex]*damageDealt - currentParty.defweight*damageTaken
 								currentParty.health = originHealth[curIndex] # reset health totals after each test
 								allParties[oppIndex].health = originHealth[oppIndex]						

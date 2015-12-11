@@ -3,6 +3,7 @@
 import ggparty
 import ggmap
 import pygame
+import math
 
 # Set the party to be at a specific location on the supergrid, facing a specific angle
 def setAbsolute(player, location, direction, visual):
@@ -106,7 +107,9 @@ class Move():
 						elif element_facing == ggparty.LEFT:
 							match = tarloc[0] == atkloc[0]
 						if match:
-							targets[1].health -= self.damage
+							x=1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)
+							print x
+							targets[1].health -= int((self.damage)/math.ceil(x))
 							if screen != 0:
 								self.drawAttack(atkloc, tarloc, screen)
 								for i in range(len(allPlayers)):
