@@ -5,6 +5,9 @@ import ggcreateparty
 import ggmap
 import ggparty
 import ggai
+import math
+import csv
+import datetime
 
 # Enums/Constants
 #  -- Scenes
@@ -26,11 +29,12 @@ running = 1
 current_scene = CREATE_PARTY
 partyScene = -1
 mapScene = -1
-NUM_AI_PLAYERS = 2
+NUM_AI_PLAYERS = 3
 starts = [[0,0],
 		[ggmap.GRID_SIZE-3,ggmap.GRID_SIZE-3],
 		[ggmap.GRID_SIZE-3,0],
-		[0,ggmap.GRID_SIZE-3]]
+		[0,ggmap.GRID_SIZE-3],
+		[math.floor((ggmap.GRID_SIZE-3)/2),math.floor((ggmap.GRID_SIZE-3)/2)]]
 delay = 0
 step = 0
 		
@@ -67,12 +71,14 @@ while running:
 			aiPlayers = []
 			for i in range(NUM_AI_PLAYERS):
 				aiPlayers.append(ggai.constructParty())
-				aiPlayers[i].assignAI(ggai.AIOpponent())
+				aiPlayers[i].trust = [0]*(NUM_AI_PLAYERS+1)
+				aiPlayers[i].assignAI(ggai.AIOpponent(ggai.metric_distance, ggai.metric_threat))
 			# huParty.party_members[x].chartype gives element type
 			# '' .rotation gives element angle
 			# huParty.party_position[x]
 			# CharacterSprite class in ggparty has this info
 			if huPlayer != -1:
+				huPlayer.trust = [0]*(NUM_AI_PLAYERS+1)
 				switchToScene(GAME_GRID)
 				mapScene.addPartyToMap(huPlayer,ggparty.UP,starts[0][0],starts[0][1])
 				huPlayer.grid_color = ggparty.BLUE
@@ -126,5 +132,12 @@ while running:
 
 		pygame.display.flip()
 		pygame.time.wait(delay)
+
+recordName = 'GridGameOutput-' + datetime.datetime.now().strftime('%m-%d-%y-%H-%M-%S') + '.csv'
+with open(recordName,'wb') as csvfile:
+	output = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+	output.writerow(huPlayer.healthRecord)
+	for currentAI in aiPlayers:
+		output.writerow(currentAI.healthRecord)
 
 pygame.quit()

@@ -71,6 +71,7 @@ class Move():
 		else:
 			allPlayers = aiPlayers + [huPlayer]
 		allOccupied = [(player.getSupergridCells(), player) for player in allPlayers if player != attackingPlayer and player.health > 0]
+		indicesAttacked = []
 
 		for attacker in range(2):
 			if attackingPlayer.party_members[attacker].chartype == ggparty.SINGLE_SHOT:
@@ -94,10 +95,18 @@ class Move():
 							match_horz = tarloc[1] <= atkloc[1]
 							match_vert = tarloc[0] == atkloc[0]
 						if match_horz & match_vert:
-							targets[1].health -= self.damage
+							x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
+							print x
+							if(x<2):
+								x=2
+							targets[1].health=targets[1].health - int(x)
 							if screen != 0:
 								self.drawAttack(atkloc, tarloc, screen)
-						
+								for i in range(len(allPlayers)):
+									if targets[1] == allPlayers[i]:
+										indicesAttacked.append(i)
+										break
+								
 			elif attackingPlayer.party_members[attacker].chartype == ggparty.DOUBLE_SHOT:
 				for targets in allOccupied:
 					for tarloc in targets[0]:
@@ -114,6 +123,28 @@ class Move():
 						elif element_facing == ggparty.LEFT:
 							match = tarloc[0] == atkloc[0]
 						if match:
-							targets[1].health -= self.damage
+							x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
+							print x
+							if(x<2):
+								x=2
+							targets[1].health=targets[1].health - int(x)
 							if screen != 0:
 								self.drawAttack(atkloc, tarloc, screen)
+								for i in range(len(allPlayers)):
+									if targets[1] == allPlayers[i]:
+										indicesAttacked.append(i)
+										break
+								
+		if screen != 0:
+			indicesAttacked = set(indicesAttacked)
+			for i in range(len(allPlayers)):
+				if allPlayers[i] == attackingPlayer:
+					attackingIndex = i
+					break
+			for index in indicesAttacked:
+				allPlayers[index].last_attacker = attackingPlayer
+				for i in range(len(allPlayers)):
+					if allPlayers[i] == allPlayers[index]:
+						allPlayers[i].decreaseTrust(attackingIndex)
+					elif allPlayers[i] != attackingPlayer:
+						allPlayers[i].increaseTrust(attackingIndex)

@@ -38,9 +38,9 @@ class CreateParty():
 		self.fontBasic =  pygame.font.SysFont("Verdana", 14)
 		self.strTitle = self.fontTitle.render("Construct Your Party", 1, UI_COLOR)
 		self.strCharDesc = []
-		self.strCharDesc.append(self.fontBasic.render("Shoots in one direction, adds 2 health points.", 0, UI_COLOR))
-		self.strCharDesc.append(self.fontBasic.render("Shoots in two directions, adds 1 health point.", 0, UI_COLOR))
-		self.strCharDesc.append(self.fontBasic.render("Cannot shoot at all, adds 5 health points.", 0, UI_COLOR))
+		self.strCharDesc.append(self.fontBasic.render("Shoots in one direction, adds 20 health points.", 0, UI_COLOR))
+		self.strCharDesc.append(self.fontBasic.render("Shoots in two directions, adds 20 health points.", 0, UI_COLOR))
+		self.strCharDesc.append(self.fontBasic.render("Cannot shoot at all, adds 120 health points.", 0, UI_COLOR))
 		self.strButton = []
 		self.strButton.append(self.fontBasic.render("Two Remaining", 0, INACTIVE_COLOR))
 		self.strButton.append(self.fontBasic.render("One Remaining", 0, INACTIVE_COLOR))

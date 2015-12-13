@@ -31,9 +31,9 @@ class MapGrid():
 	RED = (255, 0, 0)
  
 # This sets the WIDTH and HEIGHT of each grid location, as well as the size of the grid
-	BOARD_SIZE = 500;
-	CONSOLE_SIZE = 100;
-	GRID_SIZE = 10
+	BOARD_SIZE = 600
+	CONSOLE_SIZE = 120
+	GRID_SIZE = 15
 	WIDTH = (int)(BOARD_SIZE*4/(5*GRID_SIZE+1))
 	HEIGHT = (int)(BOARD_SIZE*4/(5*GRID_SIZE+1))
  
@@ -132,6 +132,7 @@ class MapGrid():
 	
 	def executeStep(self, screen, huPlayer, aiPlayers, step):
 		atklocs = []
+		
 		# For human player
 		if huPlayer is not None:
 			self.mstep.oneStep(huPlayer,huPlayer.cmd_seq[step])
@@ -149,7 +150,12 @@ class MapGrid():
 		if not GGEVAL:
 			pygame.display.flip()	
 			pygame.time.wait(500) # Wait between showing each step. Time is in milliseconds.
-		
+
+		# Record current health totals and add them to the record for each player
+		if huPlayer is not None:
+			huPlayer.healthRecord.append(huPlayer.health)
+		for currentAI in aiPlayers:
+			currentAI.healthRecord.append(currentAI.health)		
 	
 	#party: ggparty.PartyGrid() object
 	def addPartyToMap(self, party, angle, gridx, gridy):

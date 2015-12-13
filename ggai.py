@@ -5,15 +5,112 @@ import numpy as np
 import copy
 import ggmove
 
+MODE_OFFENSE = 0
+MODE_DEFENSE = 1
+
+#Each of the metric functions return an array containing the following respective elements:
+#	[Party to target, that party's value of metric, min value of metric, max value of metric]
+#   The latter three values are for any normalization of the metrics that may need to be done.
+#
+#The mode argument determines whether we are considering attacking or defending against the returned party (should be MODE_OFFENSE/MODE_DEFENSE).
+#The meta argument is an array of two elements [[list of trust values], last party attacked by].
+
+# Generic logic shared by all the metric functions -- you can ignore this if you aren't writing your own metric functions.
+def __metric_generic(opponentParties, opponentValues, minVal, maxVal, mode, minmodes, maxmodes):
+	if mode in minmodes:
+		retValue = maxVal+1
+		for i in range(len(opponentParties)):
+			variable = opponentValues[i]
+			if variable < retValue:
+				retParty = opponentParties[i]
+				retValue = variable
+	else:
+		retValue = minVal-1
+		for i in range(len(opponentParties)):
+			variable = opponentValues[i]
+			if variable > retValue:
+				retParty = opponentParties[i]
+				retValue = variable	
+	return [retParty, retValue, minVal, maxVal]	
+
+#Determines a party in terms of your distance to them
+#	MODE_OFFENSE: Returns closest party
+#	MODE_DEFENSE: Returns closest party
+def metric_distance(allParties, myParty, mode):
+	opponentParties = [party for party in allParties if party != myParty]
+	return __metric_generic(opponentParties, [min(abs(party.supergrid_location[0]-myParty.supergrid_location[0]),
+												  abs(party.supergrid_location[1]-myParty.supergrid_location[1])) for party in opponentParties], 0, 10, mode, [MODE_OFFENSE, MODE_DEFENSE], [])
+
+#Determines a party in terms of their remaining health
+#	MODE_OFFENSE: Returns party with least health
+#	MODE_DEFENSE: Returns party with most health
+def metric_health(allParties, myParty, mode):
+	opponentParties = [party for party in allParties if party != myParty]
+	return __metric_generic(opponentParties, [party.health for party in opponentParties], 0, 100, mode, [MODE_OFFENSE], [MODE_DEFENSE])
+
+#Determines a party in terms of their firepower.
+#	MODE_OFFENSE: Returns party with least firepower
+#	MODE_DEFENSE: Returns party with most firepower
+def metric_threat(allParties, myParty, mode):
+	opponentParties = [party for party in allParties if party != myParty]
+	values = []
+	for party in opponentParties:
+		threat = 0
+		for char in party.party_members:
+			if char.chartype == ggparty.SINGLE_SHOT:
+				threat += 1
+			elif char.chartype == ggparty.DOUBLE_SHOT:
+				threat += 2
+		values.append(threat)
+	return __metric_generic(opponentParties, values, 1, 4, mode, [MODE_OFFENSE], [MODE_DEFENSE])
+
+#Determines a party in terms of their amount of vulnerable surface area.
+#	MODE_OFFENSE: Returns party with most surface area
+#	MODE_DEFENSE: Returns party with least surface area
+def metric_ease(allParties, myParty, mode):
+	opponentParties = [party for party in allParties if party != myParty]
+	values = []
+	for party in opponentParties:
+		surface = 0
+		for char in party.party_members:
+			if char.chartype == ggparty.SINGLE_SHOT:
+				surface += 2
+			elif char.chartype == ggparty.DOUBLE_SHOT:
+				surface += 3
+			else:
+				surface += 4
+		values.append(surface)
+	return __metric_generic(opponentParties, values, 4, 7, mode, [MODE_DEFENSE], [MODE_OFFENSE])
+
+#Determines a party in terms of their level of trust
+#	MODE_OFFENSE: Returns the least trusted party
+#	MODE_DEFENSE: Returns the most trusted party
+def metric_trust(allParties, myParty, mode):
+	opponentParties = [party for party in allParties if party != myParty]
+	trustValues = []
+	for i in range(len(allParties)):
+		if allParties[i] != myParty:
+			trustValues.append(myParty.trust[i])
+	return __metric_generic(opponentParties, 0, -5, 5, mode, [MODE_OFFENSE], [MODE_DEFENSE])
+
+#Gives the party that attacked you most recently
+#	MODE_OFFENSE & MODE_DEFENSE both return the same party.
+def metric_agro(allParties, myParty, mode):
+	opponentParties = [party for party in allParties if party != myParty]
+	if myParty.last_attacker == -1:
+		myParty.last_attacker = random.choice(opponentParties)
+	return myParty.last_attacker
 
 class AIOpponent_nondeterministic():
-	
-	def __init__(self):
+	#Attack metric & defend metric should be pointers to one of the metric functions above.
+	def __init__(self, attack_metric, defend_metric):
 		#Each entry in the action table is of the form [Number of moves-1][Row-Offset, Col-Offset, Facing Direction]
 		#Sequence table is a parallel array with the cooresponding actions that results in the above offset/direction.
 		self.move_obj = ggmove.Move()
 		self.action_table = [[],[],[]]
 		self.sequence_table = [[],[],[]]
+		self.attack_metric = attack_metric
+		self.defend_metric = defend_metric
 		for move1 in [ggparty.UP, ggparty.DOWN, ggparty.LEFT, ggparty.RIGHT]:
 			trans = [0,0]
 			trans = self.calcTranslate(trans, move1)
@@ -64,6 +161,8 @@ class AIOpponent_nondeterministic():
 			originDirections.append(allParties[i].grid_angle)
 			originHealth.append(allParties[i].health)
 
+		targetPriority = [1]*len(allParties)
+		
 		bestAction = [0,0,0]
 		for moveIndex in range(3):
 			maxPayoffs = [-999, -999] # [0] is best action, [1] is second best
@@ -91,7 +190,18 @@ class AIOpponent_nondeterministic():
 								self.move_obj.attack(allParties[oppIndex],currentParty,[],0)
 								damageTaken = originHealth[curIndex] - currentParty.health
 								damageDealt = originHealth[oppIndex] - allParties[oppIndex].health
-								payoff += damageDealt - damageTaken
+								r=float(float(currentParty.health)/float(currentParty.healthRecord[0]))
+								#print r
+								if(r>0.8):
+									currentParty.atkweight=2
+									currentParty.defweight=1
+								elif(r>0.5 and r<0.8):
+									currentParty.atkweight=1
+									currentParty.defweight=1
+								else:
+									currentParty.atkweight=1
+									currentParty.defweight=2 
+								payoff += currentParty.atkweight*targetPriority[oppIndex]*damageDealt - currentParty.defweight*damageTaken
 								currentParty.health = originHealth[curIndex] # reset health totals after each test
 								allParties[oppIndex].health = originHealth[oppIndex]						
 				
@@ -116,12 +226,14 @@ class AIOpponent_nondeterministic():
 # AI logic for the opponent(s)
 class AIOpponent():
 	
-	def __init__(self):
+	def __init__(self, attack_metric, defend_metric):
 		#Each entry in the action table is of the form [Number of moves-1][Row-Offset, Col-Offset, Facing Direction]
 		#Sequence table is a parallel array with the cooresponding actions that results in the above offset/direction.
 		self.move_obj = ggmove.Move()
 		self.action_table = [[],[],[]]
 		self.sequence_table = [[],[],[]]
+		self.attack_metric = attack_metric
+		self.defend_metric = defend_metric
 		for move1 in [ggparty.UP, ggparty.DOWN, ggparty.LEFT, ggparty.RIGHT]:
 			trans = [0,0]
 			trans = self.calcTranslate(trans, move1)
@@ -171,7 +283,9 @@ class AIOpponent():
 			originLocations.append([allParties[i].supergrid_location[0], allParties[i].supergrid_location[1]])
 			originDirections.append(allParties[i].grid_angle)
 			originHealth.append(allParties[i].health)
-
+			
+		targetPriority = [1]*len(allParties)
+		
 		bestAction = [0,0,0]
 		for moveIndex in range(3):
 			maxPayoff = -999
@@ -198,7 +312,20 @@ class AIOpponent():
 								self.move_obj.attack(allParties[oppIndex],currentParty,[],0)
 								damageTaken = originHealth[curIndex] - currentParty.health
 								damageDealt = originHealth[oppIndex] - allParties[oppIndex].health
-								payoff += damageDealt - damageTaken
+								r=float(float(currentParty.health)/float(currentParty.healthRecord[0]))
+								#print currentParty.health
+								#print currentParty.healthRecord[0]
+								print r
+								if(r>0.8):
+									currentParty.atkweight=2
+									currentParty.defweight=1
+								elif(r>0.5 and r<0.8):
+									currentParty.atkweight=1
+									currentParty.defweight=1
+								else:
+									currentParty.atkweight=1
+									currentParty.defweight=2 
+								payoff += currentParty.atkweight*targetPriority[oppIndex]*damageDealt - currentParty.defweight*damageTaken
 								currentParty.health = originHealth[curIndex] # reset health totals after each test
 								allParties[oppIndex].health = originHealth[oppIndex]						
 				
@@ -212,37 +339,7 @@ class AIOpponent():
 
 		dir_seq = bestAction
 		return dir_seq
-			
-#			OccupyZone_self = []
-#			AttackZones_self = []
-#			AttackDirections_self = []
-#			for move in range(3):
-#				ggmove.Move().oneStep(ghostSelf,directions[action_table[i,move]])
-#				OccupyZone_self.append([ghostSelf.getOccupyZone()])
-#				AttackZones_self.append([ghostSelf.getAttackZones()]) # There might be more than one attack zones according to attack directions
-#
-#			for j in range( 0, len(parties) ):  # select an opponent party
-#				if j != self.myID:
-#					for k in range( 0, numActions ):  # select the opponent's potential action
-#						OccupyZone_opponent = parties[j].getOccupyZone( action_table[k] )
-#						AttackZones_opponent = parties[j].getAttackZones( action_table[k] )  # There might be more than one attack zones according to attack directions
-#						AttackDirections_opponent = parties[j].getAttackDirectoins( action_table[k] )  # There might be more than one attack directions
-#
-#						for m in range(0, AttackDirections_self.shape[0]): # there could be more than one shooting directions from AI
-#							AttackPoints += ( AttackZones_self[m] * OccupyZone_opponent ).sum()
-#
-#						for m in range(0, AttackDirections_opponent.shape[0]):  # there could be more than one shooting directions from opponent
-#							DamagePoints += ( AttackZones_opponent[m] * OccupyZone_self ).sum()
-#
-#						F += AttackPoints - DamagePoints  # accumulate current benefit
-#
-#			if F > maxF:
-#				maxF = F
-#				action_index = i
-#
-#		# dir = random.randrange(0,4)
-#		dir_seq = [ directions[ action_table[action_index][0] ], directions[ action_table[action_index][1] ], directions[ action_table[action_index][2] ] ]
-#		return dir_seq
+
 
 # Return a constructed party with two characters.
 # For now, this is generating a randomish party, however...
