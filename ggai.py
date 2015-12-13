@@ -319,7 +319,7 @@ class AIOpponent():
 								if(r>0.8):
 									currentParty.atkweight=2
 									currentParty.defweight=1
-								elif(r>0.5 and r<0.5):
+								elif(r>0.5 and r<0.8):
 									currentParty.atkweight=1
 									currentParty.defweight=1
 								else:
