@@ -4,6 +4,9 @@ import ggparty
 import ggmove
 from copy import deepcopy
 
+global GGEVAL
+GGEVAL = True
+
 # Enums/Constants
 #  -- Mouse Buttons
 MOUSE_LEFT = 1
@@ -48,8 +51,9 @@ class MapGrid():
 		self.exe = 0
 		
 		# Initialize text variables
-		self.myfont = pygame.font.SysFont("arial bold",(int)(BOARD_SIZE/15))
-		self.healthfont = pygame.font.SysFont("arial bold",(int)(BOARD_SIZE/30))
+		if not GGEVAL:
+			self.myfont = pygame.font.SysFont("arial bold",(int)(BOARD_SIZE/15))
+			self.healthfont = pygame.font.SysFont("arial bold",(int)(BOARD_SIZE/30))
 		
 		for row in range(GRID_SIZE):
 	# Add an empty array that will hold each cell
@@ -62,20 +66,24 @@ class MapGrid():
 		
 		# Set the HEIGHT and WIDTH of the screen
 		WINDOW_SIZE = [BOARD_SIZE, BOARD_SIZE+CONSOLE_SIZE]
-		screen = pygame.display.set_mode(WINDOW_SIZE)
+		if not GGEVAL:
+			screen = pygame.display.set_mode(WINDOW_SIZE)
  
 	# Set title of screen
-		pygame.display.set_caption("Arena Combat Game")
-		# Loop until the user clicks the close button.
-		done = False
+		if not GGEVAL:
+			pygame.display.set_caption("Arena Combat Game")
+			# Loop until the user clicks the close button.
+			done = False
  
 	# Used to manage how fast the screen updates
-		clock = pygame.time.Clock()
-		delay = 0;
+		if not GGEVAL:
+			clock = pygame.time.Clock()
+			delay = 0
  
 	# Initialize text outputs
-		myfont = pygame.font.SysFont("arial bold",22)
-		currentalert = []
+		if not GGEVAL:
+			myfont = pygame.font.SysFont("arial bold",22)
+			currentalert = []
 
 	# Initialize command variables
 		self.mstep = ggmove.Move()
@@ -87,43 +95,48 @@ class MapGrid():
 	def update(self, event, screen, huPlayer, aiPlayers):
 		#TODO: handling of keyboard input, mouse clicks, etc for the map scene.
 		# Particuarly, inputting the movement sequences, and clicking the buttons to go to the simulation phase.
-		if event.type == pygame.QUIT:  # If user clicked close
-			return 0  # Flag that we are done so we exit this loop
-		elif event.type == pygame.KEYDOWN: # If user presses a key
-			if event.key == pygame.K_BACKSPACE and huPlayer.cmd_id > 0: # If key is backspace, and any commands have been enterred
-				huPlayer.cmd_id -= 1 # Decrement command ID
-				huPlayer.cmd_seq[huPlayer.cmd_id] = -1 # Remove last entered command
-			elif event.key == pygame.K_RETURN: # If key is return
-				self.atklocs_seq = []
-				currentalert = [] # Clear current alert
-				self.exe = 1 # We're now in the execution phase
-				for currentAI in aiPlayers:
-					currentAI.cmd_seq = currentAI.ai_control.decideMoves(currentAI, aiPlayers + [huPlayer]) # get AI commands for each step
-			elif huPlayer.cmd_id < 3:
-				if event.key == pygame.K_UP: # Directional arrow keys
-					huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.UP # Add corresponding command to the sequence
-					huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
-					#player.loc[0][1] -= 1
-				elif event.key == pygame.K_DOWN:
-					huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.DOWN # Add corresponding command to the sequence
-					huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
-					#player.loc[0][1] += 1
-				elif event.key == pygame.K_RIGHT:
-					huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.RIGHT # Add corresponding command to the sequence
-					huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
-					#player.loc[0][0] += 1
-				elif event.key == pygame.K_LEFT:
-					huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.LEFT # Add corresponding command to the sequence
-					huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
-					#player.loc[0][0] -= 1
-		
+		if not GGEVAL:
+			if event.type == pygame.QUIT:  # If user clicked close
+				return 0  # Flag that we are done so we exit this loop
+			elif event.type == pygame.KEYDOWN: # If user presses a key
+				if event.key == pygame.K_BACKSPACE and huPlayer.cmd_id > 0: # If key is backspace, and any commands have been enterred
+					huPlayer.cmd_id -= 1 # Decrement command ID
+					huPlayer.cmd_seq[huPlayer.cmd_id] = -1 # Remove last entered command
+				elif event.key == pygame.K_RETURN: # If key is return
+					self.atklocs_seq = []
+					currentalert = [] # Clear current alert
+					self.exe = 1 # We're now in the execution phase
+					for currentAI in aiPlayers:
+						currentAI.cmd_seq = currentAI.ai_control.decideMoves(currentAI, aiPlayers + [huPlayer]) # get AI commands for each step
+				elif huPlayer.cmd_id < 3:
+					if event.key == pygame.K_UP: # Directional arrow keys
+						huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.UP # Add corresponding command to the sequence
+						huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
+						#player.loc[0][1] -= 1
+					elif event.key == pygame.K_DOWN:
+						huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.DOWN # Add corresponding command to the sequence
+						huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
+						#player.loc[0][1] += 1
+					elif event.key == pygame.K_RIGHT:
+						huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.RIGHT # Add corresponding command to the sequence
+						huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
+						#player.loc[0][0] += 1
+					elif event.key == pygame.K_LEFT:
+						huPlayer.cmd_seq[huPlayer.cmd_id] = ggparty.LEFT # Add corresponding command to the sequence
+						huPlayer.cmd_id += 1 # Increment command ID (command 0, command 1, command 2)
+						#player.loc[0][0] -= 1
+		else:
+			for currentAI in aiPlayers:
+						currentAI.cmd_seq = currentAI.ai_control.decideMoves(currentAI, aiPlayers + [huPlayer]) # get AI commands for each step
 		return 1
 	
 	def executeStep(self, screen, huPlayer, aiPlayers, step):
 		atklocs = []
 		# For human player
-		self.mstep.oneStep(huPlayer,huPlayer.cmd_seq[step])
-		self.drawParty(screen, huPlayer)
+		if huPlayer is not None:
+			self.mstep.oneStep(huPlayer,huPlayer.cmd_seq[step])
+			if not GGEVAL:
+				self.drawParty(screen, huPlayer)
 		
 		# For AI players
 		for currentAI in aiPlayers:
@@ -133,8 +146,9 @@ class MapGrid():
 				self.mstep.attack(currentAI, huPlayer, aiPlayers, screen)
 		self.mstep.attack(huPlayer, huPlayer, aiPlayers, screen)
 		
-		pygame.display.flip()	
-		pygame.time.wait(500) # Wait between showing each step. Time is in milliseconds.
+		if not GGEVAL:
+			pygame.display.flip()	
+			pygame.time.wait(500) # Wait between showing each step. Time is in milliseconds.
 		
 	
 	#party: ggparty.PartyGrid() object
@@ -146,6 +160,8 @@ class MapGrid():
 		todo = 0
 	
 	def drawParty(self, screen, party):
+		if GGEVAL:
+			return
 		column = party.supergrid_location[1]
 		row = party.supergrid_location[0]
 		party.gridPosition((MARGIN + WIDTH) * column + MARGIN,
@@ -172,6 +188,8 @@ class MapGrid():
 	
 	# Renders the console on the screen
 	def renderConsole(self, screen, huPlayer, currentalert):
+		if GGEVAL:
+			return
 		# Draw the input console
 		color = WHITE
 		pygame.draw.rect(screen,
