@@ -97,7 +97,7 @@ class Move():
 							match_vert = tarloc[0] == atkloc[0]
 						if match_horz & match_vert:
 							x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
-							print x
+							
 							if(x<2):
 								x=2
 							targets[1].health=targets[1].health - int(x)
@@ -127,7 +127,7 @@ class Move():
 							x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
 <<<<<<< HEAD
 =======
-							print x
+							
 >>>>>>> 2c64451c9d8f846c1240a1e3bf322691d1801323
 							if(x<2):
 								x=2
