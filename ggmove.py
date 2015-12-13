@@ -5,6 +5,9 @@ import ggmap
 import pygame
 import math
 
+global GGEVAL
+GGEVAL = True
+
 # Set the party to be at a specific location on the supergrid, facing a specific angle
 def setAbsolute(player, location, direction, visual):
 	player.setPartyRotation(direction, visual)
@@ -17,8 +20,9 @@ class Move():
 	def __init__(self):
 		self.damage = 5
 		# Initialize graphics
-		self.explosion = pygame.image.load('explosion.jpg')
-		self.explosion = pygame.transform.scale(self.explosion, (ggmap.WIDTH, ggmap.HEIGHT))	
+		if not GGEVAL:
+			self.explosion = pygame.image.load('explosion.jpg')
+			self.explosion = pygame.transform.scale(self.explosion, (ggmap.WIDTH, ggmap.HEIGHT))	
 	
 	def oneStep(self, player, cmd):
 		# Takes the player locations and the commands from each player
@@ -40,6 +44,8 @@ class Move():
 		player.resizeGrid(ggmap.WIDTH, ggmap.HEIGHT, ggmap.MARGIN)
 	
 	def drawAttack(self, atkloc, tarloc, screen):
+		if GGEVAL:
+			return
 		color = ggmap.RED
 		# draw beam between attacker and defender
 		pygame.draw.rect(screen,
@@ -57,7 +63,14 @@ class Move():
 		# If there are valid attacks, resolve them
 		
 		# if screen == 0, don't draw anything
-		allPlayers = aiPlayers + [huPlayer]
+
+		if attackingPlayer is None:
+			return
+
+		if huPlayer is None:
+			allPlayers = aiPlayers
+		else:
+			allPlayers = aiPlayers + [huPlayer]
 		allOccupied = [(player.getSupergridCells(), player) for player in allPlayers if player != attackingPlayer and player.health > 0]
 		indicesAttacked = []
 
@@ -112,6 +125,10 @@ class Move():
 							match = tarloc[0] == atkloc[0]
 						if match:
 							x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
+<<<<<<< HEAD
+=======
+							print x
+>>>>>>> 2c64451c9d8f846c1240a1e3bf322691d1801323
 							if(x<2):
 								x=2
 							targets[1].health=targets[1].health - int(x)

@@ -5,6 +5,9 @@ import copy
 import ggmove
 import ggparty
 
+
+GGEVAL = True
+
 # Enums/Constants
 #  -- Character Types
 SINGLE_SHOT = 0 	# 1x1 character that can shoot in a single direction
@@ -35,9 +38,9 @@ class CharacterSprite(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		self.ghost = ghost
 		if ghost == 0:
-			self.src_image = pygame.image.load("img/char_"+str(chartype)+".png")
+			self.src_image = pygame.image.load("img/char_"+str(chartype)+".bmp")
 		else:
-			self.src_image = pygame.image.load("img/char_trans_"+str(chartype)+".png")
+			self.src_image = pygame.image.load("img/char_trans_"+str(chartype)+".bmp")
 		self.chartype = chartype
 		self.rotate(angle)
 		self.rect = self.image.get_rect()
@@ -45,10 +48,14 @@ class CharacterSprite(pygame.sprite.Sprite):
 		self.facing = [] # This needs to mean something.
 
 	def rotate(self, angle):
+		# if GGEVAL:
+		# 	return
 		self.rotation = angle
 		self.image = pygame.transform.rotate(self.src_image, angle)
-			
+		
 	def scale(self, cellWidth, cellHeight, margin):
+		# if GGEVAL:
+		# 	return
 		dimensions = pygame.Surface.get_size(self.image)
 		source_dimensions = pygame.Surface.get_size(self.src_image)
 		if self.chartype == 0:	# 1x1
@@ -375,6 +382,8 @@ class PartyGrid():
 	# Renders the grid on screen
 
 	def renderGrid(self, screen):
+		if GGEVAL:
+			return
 		pygame.draw.rect(screen, self.grid_color, (self.grid_position[0], self.grid_position[1]
 			                   , GRID_SIZE*CELL_SIZE, GRID_SIZE*CELL_SIZE), 3)
 		for row in range(1,GRID_SIZE):
