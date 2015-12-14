@@ -162,6 +162,8 @@ class AIOpponent_nondeterministic():
 			originHealth.append(allParties[i].health)
 
 		targetPriority = [1]*len(allParties)
+		trustArray = metric_trust(allParties, currentParty, MODE_OFFENSE)
+		leastTrustedParty = trustArray[0]
 		
 		bestAction = [0,0,0]
 		for moveIndex in range(3):
@@ -179,6 +181,11 @@ class AIOpponent_nondeterministic():
 												, originLocations[curIndex][1]+self.action_table[moveIndex][actIndex][1]]
 												, self.action_table[moveIndex][actIndex][2], 0)
 				payoff = 0			
+				
+				for oppIndex in range(len(allParties)):
+					if allParties[oppIndex] == leastTrustedParty:
+						#This party is the least trusted one. Do something!
+						targetPriority[oppIndex] = 2
 				
 				for oppIndex in range(len(allParties)):
 					#Don't target self, and don't target parties that are already dead
@@ -307,7 +314,9 @@ class AIOpponent():
 			originHealth.append(allParties[i].health)
 			
 		targetPriority = [1]*len(allParties)
-		
+		trustArray = metric_trust(allParties, currentParty, MODE_OFFENSE)
+		leastTrustedParty = trustArray[0]
+
 		bestAction = [0,0,0]
 		for moveIndex in range(3):
 			maxPayoff = -999
@@ -324,6 +333,11 @@ class AIOpponent():
 												, self.action_table[moveIndex][actIndex][2], 0)
 				payoff = 0			
 				
+				for oppIndex in range(len(allParties)):
+					if allParties[oppIndex] == leastTrustedParty:
+						#This party is the least trusted one. Do something!
+						targetPriority[oppIndex] = 2
+
 				for oppIndex in range(len(allParties)):
 					#Don't target self, and don't target parties that are already dead
 					if allParties[oppIndex] != currentParty and allParties[oppIndex].health > 0:
