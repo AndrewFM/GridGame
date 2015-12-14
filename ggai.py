@@ -166,6 +166,7 @@ class AIOpponent_nondeterministic():
 		bestAction = [0,0,0]
 		for moveIndex in range(3):
 			maxPayoffs = [-999, -999] # [0] is best action, [1] is second best
+			payoffSurpassed = 0
 			currentBestActions = [-1,-1] # [0] is best action, [1] is second best
 			for actIndex in range(len(self.action_table[moveIndex])):  # select AI's potential action
 				# If we've already locked in an action, ignore all sequences that disagree with our intentions
@@ -210,11 +211,32 @@ class AIOpponent_nondeterministic():
 					maxPayoffs[0] = payoff
 					currentBestActions[1] = currentBestActions[0]
 					currentBestActions[0] = self.sequence_table[moveIndex][actIndex][moveIndex]
+					payoffSurpassed += 1
 				elif payoff > maxPayoffs[1]:
 					maxPayoffs[1] = payoff
 					currentBestActions[1] = self.sequence_table[moveIndex][actIndex][moveIndex]
 			
 			bestAction[moveIndex] = currentBestActions[random.getrandbits(1)]
+			if payoffSurpassed <= 1:
+				#All payoffs are the same, so let's fallback and start moving towards closest opponent
+				closestDist = 999
+				cloestOpp = -1
+				for oppIndex in range(len(allParties)):
+					if allParties[oppIndex] != currentParty and allParties[oppIndex].health > 0:
+						dist = abs(allParties[oppIndex].supergrid_location[0]-currentParty.supergrid_location[0])+abs(allParties[oppIndex].supergrid_location[1]-currentParty.supergrid_location[1])
+						if dist < closestDist:
+							closestOpp = oppIndex
+							closestDist = dist
+				if abs(allParties[closestOpp].supergrid_location[0]-currentParty.supergrid_location[0]) < abs(allParties[closestOpp].supergrid_location[1]-currentParty.supergrid_location[1]):
+					if allParties[closestOpp].supergrid_location[0]-currentParty.supergrid_location[0] < 0:
+						bestAction[moveIndex] = ggparty.UP
+					else:
+						bestAction[moveIndex] = ggparty.DOWN
+				else:
+					if allParties[closestOpp].supergrid_location[1]-currentParty.supergrid_location[1] < 0:
+						bestAction[moveIndex] = ggparty.LEFT
+					else:
+						bestAction[moveIndex] = ggparty.RIGHT					
 			
 		# Reset parties to original locations and directions
 		for i in range(len(allParties)):
@@ -289,6 +311,7 @@ class AIOpponent():
 		bestAction = [0,0,0]
 		for moveIndex in range(3):
 			maxPayoff = -999
+			payoffSurpassed = 0
 			for actIndex in range(len(self.action_table[moveIndex])):  # select AI's potential action
 				# If we've already locked in an action, ignore all sequences that disagree with our intentions
 				if moveIndex > 0 and self.sequence_table[moveIndex][actIndex][0] != bestAction[0]:
@@ -332,6 +355,28 @@ class AIOpponent():
 				if payoff > maxPayoff:
 					maxPayoff = payoff
 					bestAction[moveIndex] = self.sequence_table[moveIndex][actIndex][moveIndex]
+					payoffSurpassed += 1
+
+			if payoffSurpassed <= 1:
+				#All payoffs are the same, so let's fallback and start moving towards closest opponent
+				closestDist = 999
+				cloestOpp = -1
+				for oppIndex in range(len(allParties)):
+					if allParties[oppIndex] != currentParty and allParties[oppIndex].health > 0:
+						dist = abs(allParties[oppIndex].supergrid_location[0]-currentParty.supergrid_location[0])+abs(allParties[oppIndex].supergrid_location[1]-currentParty.supergrid_location[1])
+						if dist < closestDist:
+							closestOpp = oppIndex
+							closestDist = dist
+				if abs(allParties[closestOpp].supergrid_location[0]-currentParty.supergrid_location[0]) < abs(allParties[closestOpp].supergrid_location[1]-currentParty.supergrid_location[1]):
+					if allParties[closestOpp].supergrid_location[0]-currentParty.supergrid_location[0] < 0:
+						bestAction[moveIndex] = ggparty.UP
+					else:
+						bestAction[moveIndex] = ggparty.DOWN
+				else:
+					if allParties[closestOpp].supergrid_location[1]-currentParty.supergrid_location[1] < 0:
+						bestAction[moveIndex] = ggparty.LEFT
+					else:
+						bestAction[moveIndex] = ggparty.RIGHT	
 
 		# Reset parties to original locations and directions
 		for i in range(len(allParties)):
