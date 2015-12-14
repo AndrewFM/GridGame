@@ -315,7 +315,7 @@ class AIOpponent():
 								r=float(float(currentParty.health)/float(currentParty.healthRecord[0]))
 								#print currentParty.health
 								#print currentParty.healthRecord[0]
-								print r
+								#print r
 								if(r>0.8):
 									currentParty.atkweight=2
 									currentParty.defweight=1
