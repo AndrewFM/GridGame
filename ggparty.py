@@ -6,7 +6,7 @@ import ggmove
 import ggparty
 
 
-GGEVAL = True
+GGEVAL = False
 
 # Enums/Constants
 #  -- Character Types

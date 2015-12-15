@@ -91,7 +91,7 @@ def metric_trust(allParties, myParty, mode):
 	for i in range(len(allParties)):
 		if allParties[i] != myParty:
 			trustValues.append(myParty.trust[i])
-	return __metric_generic(opponentParties, 0, -5, 5, mode, [MODE_OFFENSE], [MODE_DEFENSE])
+	return __metric_generic(opponentParties, trustValues, -5, 5, mode, [MODE_OFFENSE], [MODE_DEFENSE])
 
 #Gives the party that attacked you most recently
 #	MODE_OFFENSE & MODE_DEFENSE both return the same party.
@@ -404,15 +404,41 @@ class AIOpponent():
 # For now, this is generating a randomish party, however...
 # TODO: Construct the party intelligently using AI methods
 def constructParty():
-	newParty = ggparty.PartyGrid()
+	goodConfig = 0
+	newParty = -1
 
-	while newParty.numberOfCharacters() < 2:
-		chartype = random.choice([ggparty.SINGLE_SHOT, ggparty.DOUBLE_SHOT, ggparty.SHIELD])
-		direction = random.choice([ggparty.UP, ggparty.DOWN, ggparty.LEFT, ggparty.RIGHT])
+	while goodConfig == 0:
+		newParty = ggparty.PartyGrid()
+		goodConfig = 1
 
-		if chartype == ggparty.SHIELD:
-			newParty.appendCharacter(chartype, direction, random.choice(range(0,2)), random.choice(range(0,2)))
-		else:
-			newParty.appendCharacter(chartype, direction, random.choice(range(0,3)), random.choice(range(0,3)))
+		while newParty.numberOfCharacters() < 2:
+			chartype = random.choice([ggparty.SINGLE_SHOT, ggparty.DOUBLE_SHOT, ggparty.SHIELD])
+			direction = random.choice([ggparty.UP, ggparty.DOWN, ggparty.LEFT, ggparty.RIGHT])
+
+			if chartype == ggparty.SHIELD:
+				newParty.appendCharacter(chartype, direction, random.choice(range(0,2)), random.choice(range(0,2)))
+			else:
+				newParty.appendCharacter(chartype, direction, random.choice(range(0,3)), random.choice(range(0,3)))
+
+		# Check if this is a reasonable party configuration
+		if newParty.party_members[0].chartype == ggparty.SINGLE_SHOT and newParty.party_members[1] == ggparty.SINGLE_SHOT:
+			# Don't allow parties with two shooting characters facing in the same direction while also occupying the same row/column
+			if newParty.party_members[0].rotation == newParty.party_members[1].rotation:
+				if newParty.party_members[0].rotation == ggparty.LEFT or newParty.party_members.rotation == ggparty.RIGHT:
+					if newParty.party_positions[0][1] == newParty.party_positions[1][1]:
+						goodConfig = 0
+				else:
+					if newParty.party_positions[0][0] == newParty.party_positions[1][0]:
+						goodConfig = 0
+
+		elif newParty.party_members[0] != ggparty.SHIELD and newParty.party_members[1] != ggparty.SHIELD:
+			if not (newParty.party_members[0] == ggparty.DOUBLE_SHOT and newParty.party_members[1] == ggparty.DOUBLE_SHOT):
+				# Don't allow parties with two shooting characters facing in the same direction while also occupying the same row/column
+				if (newParty.party_members[0].rotation == ggparty.LEFT or newParty.party_members[0].rotation == ggparty.RIGHT) and (newParty.party_members[1].rotation == ggparty.LEFT or newParty.party_members[1].rotation == ggparty.RIGHT):
+					if newParty.party_positions[0][1] == newParty.party_positions[1][1]:
+						goodConfig = 0
+				elif (newParty.party_members[0].rotation == ggparty.UP or newParty.party_members[0].rotation == ggparty.DOWN) and (newParty.party_members[1].rotation == ggparty.UP or newParty.party_members[1].rotation == ggparty.DOWN):
+					if newParty.party_positions[0][0] == newParty.party_positions[1][0]:
+						goodConfig = 0		
 
 	return newParty

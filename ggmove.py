@@ -6,7 +6,7 @@ import pygame
 import math
 
 global GGEVAL
-GGEVAL = True
+GGEVAL = False
 
 # Set the party to be at a specific location on the supergrid, facing a specific angle
 def setAbsolute(player, location, direction, visual):

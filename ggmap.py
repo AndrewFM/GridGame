@@ -5,7 +5,7 @@ import ggmove
 from copy import deepcopy
 
 global GGEVAL
-GGEVAL = True
+GGEVAL = False
 
 # Enums/Constants
 #  -- Mouse Buttons
