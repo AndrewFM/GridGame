@@ -96,8 +96,10 @@ class Move():
 							match_horz = tarloc[1] <= atkloc[1]
 							match_vert = tarloc[0] == atkloc[0]
 						if match_horz & match_vert:
-							x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
-							
+
+							#x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
+							x = self.damage
+							print x
 							if(x<2):
 								x=2
 							targets[1].health=targets[1].health - int(x)
@@ -124,7 +126,11 @@ class Move():
 						elif element_facing == ggparty.LEFT:
 							match = tarloc[0] == atkloc[0]
 						if match:
-							x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
+
+							#x=self.damage/float(1+((tarloc[0]-atkloc[0])**2)+((tarloc[1]-atkloc[1])**2)**0.5)
+							x = self.damage
+							print x
+
 							if(x<2):
 								x=2
 							targets[1].health=targets[1].health - int(x)
